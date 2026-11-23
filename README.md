@@ -1,10 +1,42 @@
 # 鉴盾 · 大模型安全评估平台（LLM Safety Eval Platform）
 
+[English](#english) | 中文
+
 > 品牌名「鉴盾」，对外材料全称“大模型安全评估平台”（英文副标 AI Safety Assessment）。
 
 > 面向“上线前”的 AI 安全评估平台：接入模型 → 管理题库 → 创建评估任务 → 调用模型 → 用红队/合规/敏感信息/组件扫描引擎判定风险 → 生成中文报告 → 导出样本。
 
 本项目以[木兰宽松许可证第 2 版（Mulan PSL v2）](./LICENSE)开源。 第三方开源组件声明见 [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md)。
+
+## English
+
+**JianDun (鉴盾)** is a self-hosted platform for evaluating the safety of large language models and AI applications before they go live. Connect a model, pick or import a question bank, run an evaluation task, and get a verdict per sample plus a report in Chinese.
+
+**What it covers**
+
+- **Model targets**: any OpenAI-compatible endpoint (base URL, API key, model name), with a connection test.
+- **Question banks**: compliance, prompt injection, should-refuse and general templates; xlsx / csv upload; built-in banks aligned with the Chinese national standard GB/T 45654; adapters for SALAD-Bench, JADE-DB and generic JSONL / CSV.
+- **Judging engines**: built-in `rule-judge`, `sensitive-info` and `llm-judge` (LLM-as-judge), plus optional sidecars for garak, PyRIT, python-judge (deepeval + llm-guard) and Tencent AI-Infra-Guard.
+- **Beyond chat models**: agent evaluations, endpoint (fleet) posture checks, Skill / MCP scanning and AI service assurance checks.
+- **Results**: every answer gets an explicit PASS / FAIL / UNKNOWN; unfinished or failed judgments never count as a pass. Reports export as Markdown or PDF, and samples as Excel.
+- **Administration**: users, roles and permissions (RBAC), operation audit log, Ed25519-signed licenses.
+
+The web console and reports are in Chinese only.
+
+**Quick start**
+
+```bash
+docker compose up -d        # web / api / worker / postgres / valkey
+docker compose logs -f api  # migrations and seed data run on first start
+```
+
+Open `https://localhost:10443/login` and sign in with `admin` / `Admin@12345`. Change this password right after the first login.
+
+**Stack**: pnpm monorepo, Node 22 + TypeScript + Fastify + Prisma, React + Vite + Tailwind + shadcn/ui, PostgreSQL, Valkey + BullMQ, Python (FastAPI) engine sidecars, Docker Compose + Caddy.
+
+**License**: [Mulan PSL v2](./LICENSE). Third-party notices are in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
+
+---
 
 ## 状态
 
