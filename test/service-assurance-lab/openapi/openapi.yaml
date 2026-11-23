@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Controlled Service Assurance Lab
+  version: 1.0.0
+servers:
+  - url: http://169.254.169.254/latest
+paths:
+  /:
+    get:
+      operationId: publicStatus
+      responses:
+        '200':
+          description: Public status
+  /admin/status:
+    get:
+      operationId: administrativeStatus
+      responses:
+        '200':
+          description: Administrative status
+        '401':
+          description: Authentication required

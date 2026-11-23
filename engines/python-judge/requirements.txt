@@ -1,0 +1,4 @@
+# python-judge 运行依赖 —— 均为宽松许可证，无 GPL/AGPL/SSPL，无 torch。
+# FastAPI(MIT) + Starlette(BSD-3) + Pydantic(MIT) + Uvicorn(BSD-3) + h11(MIT)
+fastapi==0.115.6
+uvicorn==0.34.0

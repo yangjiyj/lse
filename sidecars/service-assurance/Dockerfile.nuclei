@@ -1,0 +1,23 @@
+# syntax=docker/dockerfile:1.7
+FROM golang:1.26.3-alpine3.23@sha256:91eda9776261207ea25fd06b5b7fed8d397dd2c0a283e77f2ab6e91bfa71079d AS builder
+
+WORKDIR /src
+COPY sidecars/service-assurance/go.mod sidecars/service-assurance/go.sum ./
+COPY sidecars/service-assurance/vendor ./vendor
+COPY sidecars/service-assurance/*.go ./
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -trimpath -buildvcs=false -ldflags="-s -w" -o /out/service-assurance-sidecar .
+
+FROM projectdiscovery/nuclei:v3.4.10@sha256:aeb5ea2db32a252b8135707d2ad0e89b90e19a18ea7816d38759bc51efb46b97
+
+COPY --from=builder --chown=65532:65532 --chmod=0555 /out/service-assurance-sidecar /usr/local/bin/service-assurance-sidecar
+COPY --chown=65532:65532 service-assurance/rules /opt/service-assurance/rules
+
+USER 65532:65532
+ENV SERVICE_ASSURANCE_ENGINE=nuclei \
+    SERVICE_ASSURANCE_NUCLEI_BINARY=/usr/local/bin/nuclei \
+    SERVICE_ASSURANCE_ENGINE_VERSION=3.4.10 \
+    SERVICE_ASSURANCE_ENGINE_DIGEST=sha256:aeb5ea2db32a252b8135707d2ad0e89b90e19a18ea7816d38759bc51efb46b97 \
+    SERVICE_ASSURANCE_RULES_ROOT=/opt/service-assurance/rules \
+    SERVICE_ASSURANCE_WORK_ROOT=/tmp/jobs
+EXPOSE 8095
+ENTRYPOINT ["/usr/local/bin/service-assurance-sidecar"]

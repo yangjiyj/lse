@@ -1,0 +1,53 @@
+# GitHub Actions 示例：合并前触发 LSE 评估，门禁未通过则让检查失败。
+# 前置：把 scripts/lse-ci.mjs 与 scripts/lib/lse-ci-core.mjs 放进你的仓库（如 ci/ 目录，保持 lib/ 相对位置）；
+# 在仓库 Settings -> Secrets 配置 LSE_TOKEN，在 Variables 配置 LSE_URL、LSE_PLAN_ID。
+name: lse-gate
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lse-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      security-events: write   # 仅上传 SARIF 时需要
+    env:
+      LSE_URL: ${{ vars.LSE_URL }}
+      LSE_TOKEN: ${{ secrets.LSE_TOKEN }}
+      # 私有化自签证书：把 CA 文件放进仓库后启用（不要关闭证书校验）
+      # NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/ci/lse-ca.pem
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 触发评估并等待门禁（退出码 1 = 门禁未通过）
+        run: node ci/lse-ci.mjs run --plan "${{ vars.LSE_PLAN_ID }}" --wait --timeout 4800 --task-file lse-task.txt
+
+      - name: 导出结果
+        if: always()
+        run: |
+          if [ -s lse-task.txt ]; then
+            node ci/lse-ci.mjs export --task-file lse-task.txt --format junit --out lse-junit.xml
+            node ci/lse-ci.mjs export --task-file lse-task.txt --format sarif --out lse-results.sarif
+          fi
+
+      - name: 上传 JUnit / SARIF 为构建产物
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lse-report
+          path: |
+            lse-junit.xml
+            lse-results.sarif
+          if-no-files-found: ignore
+
+      # 可选：把 SARIF 展示到仓库的 Security -> Code scanning（需启用 Code scanning）
+      - name: 上传 SARIF 到代码扫描
+        if: always() && hashFiles(lse-results.sarif) != 
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: lse-results.sarif

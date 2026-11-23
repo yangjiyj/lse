@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "calculator": {
+      "command": "python",
+      "args": ["server.py"],
+      "env": { "LOG_LEVEL": "info", "API_TOKEN": "${API_TOKEN}" }
+    }
+  }
+}

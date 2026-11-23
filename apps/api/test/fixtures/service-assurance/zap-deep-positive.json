@@ -1,0 +1,41 @@
+{
+  "@programName": "ZAP",
+  "@version": "2.16.1",
+  "@generated": "Sun, 30 Aug 2026 08:35:00",
+  "site": [
+    {
+      "@name": "http://openapi-lab:8080",
+      "@host": "openapi-lab",
+      "@port": "8080",
+      "@ssl": "false",
+      "alerts": [
+        {
+          "pluginid": "40012",
+          "alertRef": "40012",
+          "alert": "Cross Site Scripting (Reflected)",
+          "name": "Cross Site Scripting (Reflected)",
+          "riskcode": "3",
+          "confidence": "2",
+          "riskdesc": "High (Medium)",
+          "desc": "<p>Reflected input was observed in the response.</p>",
+          "instances": [
+            {
+              "uri": "http://openapi-lab:8080/search?q=probe",
+              "method": "GET",
+              "param": "q",
+              "attack": "lse-readonly-probe",
+              "evidence": "lse-readonly-probe",
+              "otherinfo": "The response reflected the fixed non-destructive marker."
+            }
+          ],
+          "count": "1",
+          "solution": "<p>Apply context-aware output encoding and input validation.</p>",
+          "reference": "https://owasp.org/www-community/attacks/xss/",
+          "cweid": "79",
+          "wascid": "8",
+          "sourceid": "1"
+        }
+      ]
+    }
+  ]
+}

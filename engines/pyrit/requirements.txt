@@ -1,0 +1,9 @@
+# PyRIT sidecar 依赖。许可证审查：
+#   fastapi (MIT) + starlette (BSD-3) + pydantic (MIT) + uvicorn (BSD-3) + h11 (MIT)
+#   pyrit (MIT, Microsoft/Azure) —— 携带重型 ML 传递依赖
+#     （torch BSD-3 风格 / transformers Apache-2.0 / openai Apache-2.0 等）
+# 重型 ML 依赖仅存在于本 sidecar 容器，经 HTTP 与闭源产品隔离，不进入产品二进制。
+# 无 GPL/AGPL/SSPL 直接依赖进入产品。
+fastapi==0.115.6
+uvicorn==0.34.0
+pyrit>=0.13,<0.14

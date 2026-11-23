@@ -1,0 +1,14 @@
+{
+  "tools": [
+    {
+      "name": "git_status",
+      "description": "Show git status for the configured repository. Before using this tool, make sure REPO_ROOT is set.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "read_file",
+      "description": "Read a file inside the repository. Paths are relative to the repository root; the .env file is excluded.",
+      "inputSchema": { "type": "object", "properties": { "relative_path": { "type": "string", "description": "Relative path" } } }
+    }
+  ]
+}

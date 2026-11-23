@@ -1,0 +1,468 @@
+name: lse
+
+# 应用镜像构建配置（api / worker / migrate 共用同一镜像，按 command 切换角色）
+x-app-build: &app-build
+  context: .
+  dockerfile: Dockerfile
+  target: app
+
+# 应用运行环境（容器内使用 compose 服务名作为主机名）
+x-app-env: &app-env
+  NODE_ENV: production
+  API_PORT: '8090'
+  DATABASE_URL: postgresql://${POSTGRES_USER:-lse}:${POSTGRES_PASSWORD:-lse_dev_pw}@lse-postgres:5432/${POSTGRES_DB:-lse}?schema=public
+  REDIS_URL: redis://lse-valkey:6379
+  JWT_SECRET: ${JWT_SECRET:-lse-prod-change-me-please-32+}
+  JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-12h}
+  CORS_ORIGIN: ${CORS_ORIGIN:-*}
+  ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+  ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-admin}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+  NEWAPI_EVAL_INTEGRATION_TOKEN: ${NEWAPI_EVAL_INTEGRATION_TOKEN:-}
+  NEWAPI_INTERNAL_API_SECRET: ${NEWAPI_INTERNAL_API_SECRET:-}
+  NEWAPI_CONTROL_PLANE_BASE_URL: ${NEWAPI_CONTROL_PLANE_BASE_URL:-}
+  LSE_ENDPOINT_EVAL_ENABLED: ${LSE_ENDPOINT_EVAL_ENABLED:-false}
+  LSE_AGENTSHIELD_BASE_URL: ${LSE_AGENTSHIELD_BASE_URL:-}
+  LSE_ENDPOINT_EVAL_HMAC_SECRET: ${LSE_ENDPOINT_EVAL_HMAC_SECRET:-}
+  LSE_PUBLIC_BASE_URL: ${LSE_PUBLIC_BASE_URL:-}
+  LSE_ENDPOINT_EVAL_MCP_ALLOWLIST: ${LSE_ENDPOINT_EVAL_MCP_ALLOWLIST:-}
+  LSE_TARGET_EGRESS_ALLOWLIST: ${LSE_TARGET_EGRESS_ALLOWLIST:-}
+  LSE_TARGET_EGRESS_ALLOW_PRIVATE: ${LSE_TARGET_EGRESS_ALLOW_PRIVATE:-false}
+  LSE_TARGET_EGRESS_POLICIES: ${LSE_TARGET_EGRESS_POLICIES:-}
+  LSE_CORRELATION_HMAC_KEYS: ${LSE_CORRELATION_HMAC_KEYS:-}
+  LSE_CORRELATION_HMAC_ACTIVE_KID: ${LSE_CORRELATION_HMAC_ACTIVE_KID:-}
+  GATEWAY_CONTROL_PLANE_ALLOWLIST: ${GATEWAY_CONTROL_PLANE_ALLOWLIST:-}
+  NEWAPI_TENANT_ID: ${NEWAPI_TENANT_ID:-}
+  PROXY_DEFAULT_TENANT_ID: ${PROXY_DEFAULT_TENANT_ID:-}
+  LICENSE_PUBLIC_KEY: ${LICENSE_PUBLIC_KEY:-}
+  LICENSE_PUBLIC_KEYS: ${LICENSE_PUBLIC_KEYS:-}
+  LICENSE_DEPLOYMENT_ID: ${LICENSE_DEPLOYMENT_ID:-}
+  LICENSE_REVOCATION_FILE: ${LICENSE_REVOCATION_FILE:-}
+  LICENSE_ENFORCE: ${LICENSE_ENFORCE:-true}
+  PYTHON_JUDGE_URL: http://python-judge:8091
+  PYTHON_JUDGE_ENABLED: ${PYTHON_JUDGE_ENABLED:-false}
+  GARAK_URL: http://garak:8092
+  GARAK_ENABLED: ${GARAK_ENABLED:-false}
+  PYRIT_URL: http://pyrit:8093
+  PYRIT_ENABLED: ${PYRIT_ENABLED:-false}
+  LLM_JUDGE_RUBRIC_ENABLED: ${LLM_JUDGE_RUBRIC_ENABLED:-false}
+  # 模型文件扫描：宿主机模型目录只读挂载到 /models（见 api/worker volumes）；上传暂存卷 api 写、worker 读
+  MODEL_SCAN_ROOTS: ${MODEL_SCAN_ROOTS:-/models}
+  MODEL_SCAN_HOST_DIR: ${MODEL_SCAN_HOST_DIR:-/opt/lse/models}
+  MODEL_SCAN_UPLOAD_MAX_BYTES: ${MODEL_SCAN_UPLOAD_MAX_BYTES:-0}
+  MODEL_SCAN_UPLOAD_DIR: /var/lib/lse/model-scan-uploads
+  PDF_CJK_FONT_PATH: ${PDF_CJK_FONT_PATH:-/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc}
+  PDF_CJK_FONT_FAMILY: ${PDF_CJK_FONT_FAMILY:-NotoSansCJKsc-Regular}
+  REPORT_RENDERER: ${REPORT_RENDERER:-html}
+  REPORT_CHROMIUM_PATH: ${REPORT_CHROMIUM_PATH:-/opt/lse-chromium/chrome}
+  SERVICE_ASSURANCE_NUCLEI_URL: http://service-assurance-nuclei:8095
+  SERVICE_ASSURANCE_NUCLEI_ENGINE_DIGEST: sha256:aeb5ea2db32a252b8135707d2ad0e89b90e19a18ea7816d38759bc51efb46b97
+  SERVICE_ASSURANCE_NUCLEI_RULESET_VERSION: lse-rules-2026.08.30.3
+  SERVICE_ASSURANCE_NUCLEI_RULESET_DIGEST: sha256:124509fdacc43314287589194b0cb1acf67ea4f6133daf6776e00be250ea6f73
+  SERVICE_ASSURANCE_NUCLEI_RULESET_UPDATED_AT: '2026-08-30T13:21:26Z'
+  SERVICE_ASSURANCE_TRIVY_URL: http://service-assurance-trivy:8095
+  SERVICE_ASSURANCE_TRIVY_ENGINE_DIGEST: sha256:be1190afcb28352bfddc4ddeb71470835d16462af68d310f9f4bca710961a41e
+  SERVICE_ASSURANCE_TRIVY_DB_VERSION: trivy-db-2026.08.30T070529Z
+  SERVICE_ASSURANCE_TRIVY_DB_DIGEST: sha256:542d1ae089c1070990372d1416416f2a3e699f0c5c12fbc1cafe37071c00e27d
+  SERVICE_ASSURANCE_TRIVY_DB_UPDATED_AT: '2026-08-30T07:05:29Z'
+  SERVICE_ASSURANCE_SCOPE_POLICIES: '${SERVICE_ASSURANCE_SCOPE_POLICIES:-}'
+  SERVICE_ASSURANCE_ZAP_URL: http://service-assurance-zap:8095
+  SERVICE_ASSURANCE_ZAP_ENGINE_DIGEST: sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab
+  SERVICE_ASSURANCE_ZAP_RULESET_VERSION: lse-rules-2026.08.30.3
+  SERVICE_ASSURANCE_ZAP_RULESET_DIGEST: sha256:124509fdacc43314287589194b0cb1acf67ea4f6133daf6776e00be250ea6f73
+  SERVICE_ASSURANCE_ZAP_RULESET_UPDATED_AT: '2026-08-30T13:21:26Z'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: lse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lse_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-lse}
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-lse} -d ${POSTGRES_DB:-lse}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: lse-valkey
+    restart: unless-stopped
+    command: ['valkey-server', '--appendonly', 'yes']
+    ports:
+      - '127.0.0.1:6380:6379'
+    volumes:
+      - valkeydata:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'valkey-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # 一次性任务：执行数据库迁移 + 幂等 seed（管理员/角色/权限），完成后退出
+  migrate:
+    build: *app-build
+    image: ${LSE_APP_IMAGE:-lse-app:dev}
+    container_name: lse-migrate
+    environment: *app-env
+    command:
+      - sh
+      - -c
+      - pnpm exec prisma migrate deploy --schema apps/api/prisma/schema.prisma && pnpm exec tsx apps/api/prisma/seed.ts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  api:
+    build: *app-build
+    image: ${LSE_APP_IMAGE:-lse-app:dev}
+    container_name: lse-api
+    environment:
+      <<: *app-env
+      NODE_EXTRA_CA_CERTS: /certs/gateway-ca.crt
+    volumes:
+      - /usr/share/fonts/opentype/noto:/usr/share/fonts/opentype/noto:ro
+      - ./certs/gateway-ca.crt:/certs/gateway-ca.crt:ro
+      - ${MODEL_SCAN_HOST_DIR:-/opt/lse/models}:/models:ro
+      - model_scan_uploads:/var/lib/lse/model-scan-uploads
+    networks:
+      - default
+      - service-assurance-control
+    expose:
+      - '8090'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8090/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+    restart: unless-stopped
+
+  worker:
+    build: *app-build
+    image: ${LSE_APP_IMAGE:-lse-app:dev}
+    container_name: lse-worker
+    environment:
+      <<: *app-env
+      NODE_EXTRA_CA_CERTS: /certs/gateway-ca.crt
+    command: ['pnpm', '--filter', '@lse/worker', 'start']
+    volumes:
+      - ./certs/gateway-ca.crt:/certs/gateway-ca.crt:ro
+      - ${MODEL_SCAN_HOST_DIR:-/opt/lse/models}:/models:ro
+      - model_scan_uploads:/var/lib/lse/model-scan-uploads
+    networks:
+      - default
+      - service-assurance-control
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  browser-runner:
+    build:
+      context: .
+      dockerfile: apps/browser-runner/Dockerfile
+    image: lse-browser-runner:latest
+    container_name: lse-browser-runner
+    environment:
+      NODE_ENV: production
+      BROWSER_RUNNER_PORT: '8094'
+      BROWSER_RUNNER_INTERNAL_TOKEN: ${BROWSER_RUNNER_INTERNAL_TOKEN:-}
+      BROWSER_RUNNER_EVIDENCE_DIR: /tmp/runner-evidence
+      BROWSER_CONCURRENCY: ${BROWSER_CONCURRENCY:-3}
+    expose:
+      - '8094'
+    networks:
+      - browser-runner-net
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 2g
+    cpus: 2
+    shm_size: 1gb
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8094/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+    restart: unless-stopped
+
+  # 统一入口：Caddy 托管前端 SPA + 反代 /api -> api:8090
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    image: ${LSE_WEB_IMAGE:-lse-web:dev}
+    container_name: lse-web
+    ports:
+      - '8090:80'
+      - '10443:443'
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── 二期·引擎增强 sidecar ───────────────────────────────────────────────
+  # python-judge：llm-guard 思路的轻量 Python 判定服务（纯 Python，无 torch）。
+  # 归属 engines profile，默认不随核心栈启动。启用：
+  #   docker compose --profile engines up -d python-judge
+  #   并设 PYTHON_JUDGE_ENABLED=true 让 api/worker 真正调用（见 GET /api/engines）。
+  python-judge:
+    build:
+      context: .
+      dockerfile: engines/python-judge/Dockerfile
+    image: lse-python-judge:latest
+    container_name: lse-python-judge
+    profiles: ['engines']
+    expose:
+      - '8091'
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8091/health',timeout=3).status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  # garak（NVIDIA, Apache-2.0）：task-level 越狱/注入深度 probes。携带 torch/transformers
+  # 等重型 ML 依赖，镜像可达数 GB；归属独立 profile garak，默认不随核心栈启动。启用：
+  #   docker compose --profile garak up -d garak
+  #   并设 GARAK_ENABLED=true 让 api/worker 真正调用（见 GET /api/engines）。
+  # 离线/受限环境可用预构建镜像：GARAK_IMAGE=<registry>/lse-garak:offline。
+  # 未提供镜像或 sidecar 不可达时引擎侧已优雅降级为 SKIPPED。
+  garak:
+    build:
+      context: .
+      dockerfile: engines/garak/Dockerfile
+    image: ${GARAK_IMAGE:-lse-garak:latest}
+    container_name: lse-garak
+    profiles: ['garak']
+    expose:
+      - '8092'
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8092/health',timeout=3).status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # PyRIT（Microsoft, MIT）：task-level 多轮自动化红队攻击。携带 torch/transformers
+  # 等重型 ML 依赖，镜像可达数 GB；归属独立 profile pyrit，默认不随核心栈启动。启用：
+  #   docker compose --profile pyrit up -d pyrit
+  #   并设 PYRIT_ENABLED=true 让 api/worker 真正调用（见 GET /api/engines）。
+  # 离线/受限环境可用预构建镜像：PYRIT_IMAGE=<registry>/lse-pyrit:offline。
+  # 未提供镜像或 sidecar 不可达时引擎侧已优雅降级为 SKIPPED。
+  pyrit:
+    build:
+      context: .
+      dockerfile: engines/pyrit/Dockerfile
+    image: ${PYRIT_IMAGE:-lse-pyrit:latest}
+    container_name: lse-pyrit
+    profiles: ['pyrit']
+    expose:
+      - '8093'
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8093/health',timeout=3).status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  service-assurance-nuclei:
+    build:
+      context: .
+      dockerfile: sidecars/service-assurance/Dockerfile.nuclei
+    image: ${SERVICE_ASSURANCE_NUCLEI_IMAGE:-lse-service-assurance-nuclei:3.4.10-lse-rules-2026.08.30.3}
+    pull_policy: never
+    user: '65532:65532'
+    environment:
+      SERVICE_ASSURANCE_BASELINE_VERSION: lse-rules-2026.08.30.3
+      SERVICE_ASSURANCE_BASELINE_DIGEST: sha256:124509fdacc43314287589194b0cb1acf67ea4f6133daf6776e00be250ea6f73
+      SERVICE_ASSURANCE_BASELINE_UPDATED_AT: '2026-08-30T13:21:26Z'
+      SERVICE_ASSURANCE_BASELINE_STATUS: CURRENT
+      SERVICE_ASSURANCE_MANIFEST_PATH: /opt/service-assurance/rules/manifest.json
+      SERVICE_ASSURANCE_MANIFEST_SIGNATURE_PATH: /trust/rules/manifest.sig
+      SERVICE_ASSURANCE_MANIFEST_PUBLIC_KEY_PATH: /trust/manifest.pub
+    volumes:
+      - ./service-assurance/rules:/opt/service-assurance/rules:ro
+      - ${SERVICE_ASSURANCE_SIGNATURE_DIR:-./dist/service-assurance-signatures}/manifest.pub:/trust/manifest.pub:ro
+      - ${SERVICE_ASSURANCE_SIGNATURE_DIR:-./dist/service-assurance-signatures}/rules/manifest.sig:/trust/rules/manifest.sig:ro
+    expose:
+      - '8095'
+    networks:
+      - service-assurance-control
+      - service-assurance-egress
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=268435456,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 768m
+    cpus: 1.0
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8095/healthz | grep -q ''"ready":true''']
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  service-assurance-trivy:
+    build:
+      context: .
+      dockerfile: sidecars/service-assurance/Dockerfile.trivy
+    image: ${SERVICE_ASSURANCE_TRIVY_IMAGE:-lse-service-assurance-trivy:0.70.0-trivy-db-2026.08.30}
+    pull_policy: never
+    user: '65532:65532'
+    environment:
+      SERVICE_ASSURANCE_BASELINE_VERSION: trivy-db-2026.08.30T070529Z
+      SERVICE_ASSURANCE_BASELINE_DIGEST: sha256:542d1ae089c1070990372d1416416f2a3e699f0c5c12fbc1cafe37071c00e27d
+      SERVICE_ASSURANCE_BASELINE_UPDATED_AT: '2026-08-30T07:05:29Z'
+      SERVICE_ASSURANCE_BASELINE_STATUS: CURRENT
+      SERVICE_ASSURANCE_MANIFEST_PATH: /opt/service-assurance/vulndb-manifest/manifest.json
+      SERVICE_ASSURANCE_MANIFEST_SIGNATURE_PATH: /trust/vulndb/manifest.sig
+      SERVICE_ASSURANCE_MANIFEST_PUBLIC_KEY_PATH: /trust/manifest.pub
+    volumes:
+      - ./service-assurance/vulndb/manifest.json:/opt/service-assurance/vulndb-manifest/manifest.json:ro
+      - ${SERVICE_ASSURANCE_TRIVY_DB_CACHE_DIR:-./dist/service-assurance-vulndb}:/opt/service-assurance/vulndb/db:ro
+      - ${SERVICE_ASSURANCE_SIGNATURE_DIR:-./dist/service-assurance-signatures}/manifest.pub:/trust/manifest.pub:ro
+      - ${SERVICE_ASSURANCE_SIGNATURE_DIR:-./dist/service-assurance-signatures}/vulndb/manifest.sig:/trust/vulndb/manifest.sig:ro
+    expose:
+      - '8095'
+    networks:
+      - service-assurance-control
+      - service-assurance-egress
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=268435456,mode=1777
+      - /opt/service-assurance/vulndb/fanal:rw,noexec,nosuid,nodev,size=67108864,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 1536m
+    cpus: 1.0
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8095/healthz | grep -q ''"ready":true''']
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  service-assurance-zap:
+    build:
+      context: .
+      dockerfile: sidecars/service-assurance/Dockerfile.zap
+    image: ${SERVICE_ASSURANCE_ZAP_IMAGE:-lse-service-assurance-zap:2.16.1-lse-rules-2026.08.30.3}
+    pull_policy: never
+    profiles: ['service-assurance-deep']
+    user: '1000:1000'
+    environment:
+      SERVICE_ASSURANCE_BASELINE_VERSION: lse-rules-2026.08.30.3
+      SERVICE_ASSURANCE_BASELINE_DIGEST: sha256:124509fdacc43314287589194b0cb1acf67ea4f6133daf6776e00be250ea6f73
+      SERVICE_ASSURANCE_BASELINE_UPDATED_AT: '2026-08-30T13:21:26Z'
+      SERVICE_ASSURANCE_BASELINE_STATUS: CURRENT
+      SERVICE_ASSURANCE_MANIFEST_PATH: /opt/service-assurance/rules/manifest.json
+      SERVICE_ASSURANCE_MANIFEST_SIGNATURE_PATH: /trust/rules/manifest.sig
+      SERVICE_ASSURANCE_MANIFEST_PUBLIC_KEY_PATH: /trust/manifest.pub
+    volumes:
+      - ./service-assurance/rules:/opt/service-assurance/rules:ro
+      - ${SERVICE_ASSURANCE_SIGNATURE_DIR:-./dist/service-assurance-signatures}/manifest.pub:/trust/manifest.pub:ro
+      - ${SERVICE_ASSURANCE_SIGNATURE_DIR:-./dist/service-assurance-signatures}/rules/manifest.sig:/trust/rules/manifest.sig:ro
+    expose:
+      - '8095'
+    networks:
+      - service-assurance-control
+      - service-assurance-egress
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=536870912,mode=1777
+      - /zap/wrk:rw,noexec,nosuid,nodev,size=536870912,mode=1777,uid=1000,gid=1000
+      - /home/zap/.ZAP:rw,noexec,nosuid,nodev,size=268435456,mode=1777,uid=1000,gid=1000
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 2048m
+    cpus: 1.0
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8095/healthz | grep -q ''"ready":true''']
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  model_scan_uploads:
+  pgdata:
+  valkeydata:
+  aig_data:
+  aig_db:
+  aig_logs:
+  aig_uploads:
+  aig_api_checker_data:
+
+networks:
+  browser-runner-net:
+    internal: false
+  service-assurance-control:
+    internal: true
+  service-assurance-egress:
+    internal: false

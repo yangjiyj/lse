@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+pnpm-lock.yaml
+*.md
+engines/ai-infra-guard/vendor
+apps/api/src/modules/reports/html/paged.polyfill.js
+test-results/

@@ -1,0 +1,11 @@
+### LLaMA-Factory 训练配置（官方示例写法）
+model_name_or_path: Qwen/Qwen2.5-7B-Instruct
+trust_remote_code: true
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_target: all
+dataset: identity,alpaca_en_demo
+template: qwen
+output_dir: saves/qwen2.5-7b/lora/sft
+report_to: none

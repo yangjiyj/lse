@@ -1,0 +1,13 @@
+import {prisma} from '../src/db.js';
+import {hashPassword} from '../src/lib/password.js';
+import {writeFileSync,readFileSync} from 'node:fs';
+import {randomBytes} from 'node:crypto';
+const username=process.env.LSE_LAB_USERNAME??'cap-integrations-service';
+const tenant=process.env.LSE_LAB_PLATFORM_TENANT??'cap-lse-platform';
+const permissions=['eval_task:create','eval_task:read','platform_connector:restricted'];
+const role=await prisma.role.upsert({where:{name:'cap-integrations-service'},update:{},create:{name:'cap-integrations-service',permissions:{create:permissions.map(code=>({permission:{connectOrCreate:{where:{code},create:{code,name:code,group:'integration'}}}}))}}});
+const password=randomBytes(36).toString('base64url')+'aA9!';
+const user=await prisma.user.upsert({where:{username},update:{passwordHash:await hashPassword(password)},create:{username,passwordHash:await hashPassword(password),displayName:'隔离联调评估服务',roles:{create:{roleId:role.id}}}});
+writeFileSync(process.env.LSE_PLATFORM_TENANT_BINDINGS_FILE!,JSON.stringify({...JSON.parse(readFileSync(process.env.LSE_PLATFORM_TENANT_BINDINGS_FILE!,'utf8')),[user.id]:tenant}),{mode:0o600});
+writeFileSync(process.env.LSE_LAB_CREDENTIAL_FILE!,JSON.stringify({username:user.username,password,native_user_id:user.id,source_system:'lse',base_url:'http://127.0.0.1:18092'}),{mode:0o600});
+await prisma.$disconnect();console.log('isolated service identity prepared');

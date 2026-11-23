@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "artifact": "service-assurance-rules",
+  "version": "lse-rules-2026.08.30.3",
+  "source": {
+    "uri": "lse://service-assurance/rules",
+    "manifestDigest": "",
+    "layerDigest": ""
+  },
+  "license": "LSE proprietary rules with OWASP ZAP policy metadata under Apache-2.0",
+  "updatedAt": "2026-08-30T13:21:26Z",
+  "sha256": "sha256:124509fdacc43314287589194b0cb1acf67ea4f6133daf6776e00be250ea6f73",
+  "files": [
+    {
+      "path": "LICENSES.md",
+      "sha256": "sha256:c88559c69d990a713aad4144329906d09362a122e7c34cc7fce8d80ad07209d1"
+    },
+    {
+      "path": "nuclei/deep/openapi-authorization-readonly.yaml",
+      "sha256": "sha256:427764c74d54cd8120eaa2f4650c0060893f3775d7fb1c4bc607201a391665c4"
+    },
+    {
+      "path": "nuclei/safe/http-security-headers.yaml",
+      "sha256": "sha256:4dfc23fce051941609d02a3077a3f71af6f412d528e42ca7e78ef6ef8a9d1061"
+    },
+    {
+      "path": "nuclei/safe/triton-version-lead.yaml",
+      "sha256": "sha256:996575fbec65e90f01841c506fb43913abbb55f88cab4220f4d4a798cfff5fca"
+    },
+    {
+      "path": "zap/active-rules-2.16.1.txt",
+      "sha256": "sha256:58b36d25f199095998efe82010f82f4ca1f2d59506d52b8442a84b44ae0397ee"
+    },
+    {
+      "path": "zap/deep.conf",
+      "sha256": "sha256:4636338dff06ab43c040876466357b6395cbee81a6b848c996470821feb54466"
+    },
+    {
+      "path": "zap/safe.conf",
+      "sha256": "sha256:0c937ad5f9715c9c1ae12b2656f287775c0192aa3f31b4e22ead7dfa7369613e"
+    }
+  ],
+  "signature": {
+    "required": true,
+    "algorithm": "rsa-sha256"
+  }
+}

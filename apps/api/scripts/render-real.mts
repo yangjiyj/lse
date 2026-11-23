@@ -1,0 +1,13 @@
+import { readFile, writeFile } from "node:fs/promises";
+import { buildReportHtmlModel } from "../src/modules/reports/html/model.js";
+import { renderReportHtmlString } from "../src/modules/reports/html/render.js";
+import { renderHtmlToPdf } from "../src/modules/reports/html/chromium.js";
+const [src, out] = process.argv.slice(2);
+const row = JSON.parse(await readFile(src, "utf8"));
+const report: any = { ...row, createdAt: new Date(row.createdAt) };
+const model = buildReportHtmlModel(report, { reportId: row.id } as any);
+const html = renderReportHtmlString(model);
+await writeFile(out + ".html", html, "utf8");
+const pdf = await renderHtmlToPdf(html, { executablePath: process.env.CHROMIUM_PATH });
+await writeFile(out + ".pdf", pdf);
+console.log("ok", pdf.length);

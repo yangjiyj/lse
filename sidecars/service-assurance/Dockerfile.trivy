@@ -1,0 +1,23 @@
+# syntax=docker/dockerfile:1.7
+FROM golang:1.26.3-alpine3.23@sha256:91eda9776261207ea25fd06b5b7fed8d397dd2c0a283e77f2ab6e91bfa71079d AS builder
+
+WORKDIR /src
+COPY sidecars/service-assurance/go.mod sidecars/service-assurance/go.sum ./
+COPY sidecars/service-assurance/vendor ./vendor
+COPY sidecars/service-assurance/*.go ./
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -trimpath -buildvcs=false -ldflags="-s -w" -o /out/service-assurance-sidecar .
+
+FROM aquasec/trivy:0.70.0@sha256:be1190afcb28352bfddc4ddeb71470835d16462af68d310f9f4bca710961a41e
+
+COPY --from=builder --chown=65532:65532 --chmod=0555 /out/service-assurance-sidecar /usr/local/bin/service-assurance-sidecar
+COPY --chown=65532:65532 service-assurance/vulndb/manifest.json /opt/service-assurance/vulndb-manifest/manifest.json
+
+USER 65532:65532
+ENV SERVICE_ASSURANCE_ENGINE=trivy \
+    SERVICE_ASSURANCE_TRIVY_BINARY=/usr/local/bin/trivy \
+    SERVICE_ASSURANCE_ENGINE_VERSION=0.70.0 \
+    SERVICE_ASSURANCE_ENGINE_DIGEST=sha256:be1190afcb28352bfddc4ddeb71470835d16462af68d310f9f4bca710961a41e \
+    SERVICE_ASSURANCE_VULNDB_ROOT=/opt/service-assurance/vulndb \
+    SERVICE_ASSURANCE_WORK_ROOT=/tmp/jobs
+EXPOSE 8095
+ENTRYPOINT ["/usr/local/bin/service-assurance-sidecar"]

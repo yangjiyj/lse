@@ -1,0 +1,356 @@
+#!/usr/bin/env bash
+# @@PRODUCT@@ 终端一键接入脚本（Linux）。
+# 本脚本由服务端动态生成：服务端地址、证书指纹、探针包下载地址与散列都已写死在下方，请勿手工修改。
+# 用法：sudo bash jiandun-probe.sh --code '<接入码>' [--enable-eval] [--switch]
+set -euo pipefail
+umask 077
+
+PRODUCT=@@PRODUCT@@
+SERVER=@@SERVER@@
+CERT_SHA256=@@CERT_SHA256@@
+
+# ---------------------------------------------------------------- 路径与工具
+STAGE_ROOT=/var/lib/asp-kit-staging
+STATE_DIR=/var/lib/agent-platform-collector
+BASE_DIR=/opt/agent-platform-collector
+UNIT_FILE=/etc/systemd/system/agent-platform-collector.service
+EVAL_REGISTRY=/etc/agent-platform-eval/eval-registry.json
+SERVICE=agent-platform-collector
+CURL=curl
+SYSTEMCTL=systemctl
+TEST_MODE=0
+# 只有显式设置 JD_TEST_MODE=1 才允许重定向路径（供自动化测试使用，正常安装不要设置）。
+if [ "${JD_TEST_MODE:-}" = "1" ]; then
+  TEST_MODE=1
+  STAGE_ROOT=${JD_TEST_STAGE_ROOT:-$STAGE_ROOT}
+  STATE_DIR=${JD_TEST_STATE_DIR:-$STATE_DIR}
+  BASE_DIR=${JD_TEST_BASE_DIR:-$BASE_DIR}
+  UNIT_FILE=${JD_TEST_UNIT_FILE:-$UNIT_FILE}
+  EVAL_REGISTRY=${JD_TEST_EVAL_REGISTRY:-$EVAL_REGISTRY}
+  SYSTEMCTL=${JD_TEST_SYSTEMCTL:-$SYSTEMCTL}
+fi
+
+say() { printf '%s\n' "$*"; }
+err() { printf '错误：%s\n' "$*" >&2; }
+die() { err "$1"; shift; local line; for line in "$@"; do printf '%s\n' "$line" >&2; done; exit 1; }
+
+usage() {
+  cat <<'JD_USAGE_EOF'
+用法：sudo bash jiandun-probe.sh --code '<接入码>' [--enable-eval] [--switch]
+
+  --code <接入码>   在平台「评估中心 -> 终端 -> 接入终端」创建的一次性接入码（也可用环境变量 JD_CODE，
+                    或不带参数，按提示输入）
+  --enable-eval     开启真机测评能力（需要本机已装 claude 或 codex，并以 sudo 从登录用户运行）
+  --switch          本机已接入智能体安全平台（或其他服务端）时，先解除原有绑定再接入本平台
+  -h, --help        显示本说明
+JD_USAGE_EOF
+}
+
+WORK=""
+KIT=""
+cleanup() {
+  if [ -n "$WORK" ]; then rm -rf -- "$WORK"; fi
+  if [ -n "$KIT" ]; then rm -rf -- "$KIT"; fi
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# ---------------------------------------------------------------- 参数
+ORIG_ARGS=("$@")
+CODE="${JD_CODE:-}"
+unset JD_CODE || true
+ENABLE_EVAL=0
+SWITCH=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --code)
+      [ $# -ge 2 ] || die "--code 后面需要接入码"
+      CODE=$2
+      shift 2
+      ;;
+    --code=*)
+      CODE=${1#--code=}
+      shift
+      ;;
+    --enable-eval) ENABLE_EVAL=1; shift ;;
+    --switch) SWITCH=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) usage >&2; die "未知参数：$1" ;;
+  esac
+done
+
+# ---------------------------------------------------------------- 权限与环境
+if [ "$TEST_MODE" != 1 ] && [ "$(id -u)" -ne 0 ]; then
+  if command -v sudo >/dev/null 2>&1 && [ -f "$0" ]; then
+    say "需要 root 权限，正在通过 sudo 重新运行……"
+    exec sudo bash "$0" ${ORIG_ARGS[@]+"${ORIG_ARGS[@]}"}
+  fi
+  die "需要 root 权限：请使用 sudo 运行本脚本。"
+fi
+
+[ "$(uname -s)" = "Linux" ] || die "本脚本只支持 Linux 终端。"
+for tool in "$CURL" tar sha256sum "$SYSTEMCTL" install mktemp; do
+  command -v "$tool" >/dev/null 2>&1 || die "缺少必需的命令：$tool，请先安装后重试。"
+done
+if [ "$TEST_MODE" != 1 ] && [ ! -d /run/systemd/system ]; then
+  die "本机没有运行 systemd，无法安装采集服务。"
+fi
+
+case "${JD_TEST_ARCH:-$(uname -m)}" in
+  x86_64|amd64) JD_ARCH=amd64 ;;
+  aarch64|arm64) JD_ARCH=arm64 ;;
+  *) die "不支持的 CPU 架构：$(uname -m)（仅支持 x86_64 和 aarch64）。" ;;
+esac
+
+KIT_URL=""
+KIT_FILE=""
+KIT_SHA256=""
+MANIFEST_SHA256=""
+KIT_VERSION=""
+case "$JD_ARCH" in
+@@KIT_CASES@@
+esac
+[ -n "$KIT_URL" ] || die "服务端暂未提供 $JD_ARCH 架构的探针包，请联系平台管理员。"
+REV8=${KIT_VERSION:0:8}
+
+# ---------------------------------------------------------------- 本机现状
+json_str() {
+  sed -n 's/.*"'"$2"'"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$1" 2>/dev/null | head -n 1
+}
+
+BOUND=0
+BOUND_KIND=""
+BOUND_SERVER=""
+if [ -f "$STATE_DIR/endpoint.json" ]; then
+  BOUND=1
+  BOUND_SERVER=$(json_str "$STATE_DIR/endpoint.json" server)
+  for f in endpoint.json collector.json enterprise-install.json; do
+    if [ -f "$STATE_DIR/$f" ]; then
+      k=$(json_str "$STATE_DIR/$f" server_kind)
+      if [ -n "$k" ]; then BOUND_KIND=$k; break; fi
+    fi
+  done
+  [ -n "$BOUND_KIND" ] || BOUND_KIND=agentshield
+fi
+
+MODE=install
+UNBIND=0
+if [ "$BOUND" = 1 ]; then
+  if [ "$BOUND_KIND" = "jiandun" ] && [ "$BOUND_SERVER" = "$SERVER" ] && [ "$SWITCH" = 0 ]; then
+    MODE=upgrade
+  elif [ "$SWITCH" = 1 ]; then
+    UNBIND=1
+  elif [ "$BOUND_KIND" = "jiandun" ]; then
+    die "本机已接入另一个${PRODUCT}服务端（$BOUND_SERVER），拒绝覆盖。" \
+        "如确需改接到 $SERVER，请重新运行并加 --switch（会先解除原有绑定）。"
+  else
+    die "本机已接入智能体安全平台，一台终端同一时刻只能听一个服务端。" \
+        "如要改接到${PRODUCT}，请重新运行并加 --switch（会先解除原有绑定，原平台上该终端将不再上报）。"
+  fi
+fi
+
+# ---------------------------------------------------------------- 接入码
+if [ "$MODE" = install ]; then
+  if [ -z "$CODE" ]; then
+    if ( exec 3<>/dev/tty ) 2>/dev/null; then
+      printf '请输入接入码（输入时不显示）：' >/dev/tty
+      IFS= read -r -s CODE </dev/tty || true
+      printf '\n' >/dev/tty
+    fi
+  fi
+  [ -n "$CODE" ] || die "缺少接入码：请加 --code '<接入码>'，或设置环境变量 JD_CODE。"
+  case "$CODE" in
+    jdc_*) ;;
+    *) die "接入码格式不对：应以 jdc_ 开头。请确认复制的是${PRODUCT}的接入码，而不是智能体安全平台的。" ;;
+  esac
+  if [ "${#CODE}" -gt 200 ] || printf '%s' "$CODE" | grep -E '[^A-Za-z0-9_-]' >/dev/null; then
+    die "接入码含有不允许的字符或过长，请重新复制。"
+  fi
+fi
+
+say "${PRODUCT}终端一键接入"
+say "  服务端：$SERVER"
+say "  探针包：$JD_ARCH，版本 $REV8"
+case "$MODE:$UNBIND" in
+  install:1) say "  操作：解除原有绑定后重新接入" ;;
+  install:0) say "  操作：全新接入" ;;
+  upgrade:*) say "  操作：本机已接入，仅升级探针包（无需接入码）" ;;
+esac
+
+# ---------------------------------------------------------------- 工作目录
+STAGE_ROOT_PARENT=$(dirname "$STAGE_ROOT")
+install -d -m 0755 "$STAGE_ROOT_PARENT" 2>/dev/null || true
+if [ -e "$STAGE_ROOT" ]; then
+  if [ "$TEST_MODE" != 1 ]; then
+    [ -d "$STAGE_ROOT" ] && [ ! -L "$STAGE_ROOT" ] || die "$STAGE_ROOT 不是普通目录，请检查后重试。"
+    set -- $(stat -c '%u %a' "$STAGE_ROOT")
+    [ "$1" = "0" ] || die "$STAGE_ROOT 的属主不是 root，拒绝使用。"
+    case "$2" in
+      *[2367][0-7]|*[0-7][2367]) die "$STAGE_ROOT 对组或其他用户可写，拒绝使用。" ;;
+    esac
+  fi
+else
+  install -d -m 0755 "$STAGE_ROOT"
+fi
+WORK=$(mktemp -d "$STAGE_ROOT/work.XXXXXX")
+chmod 0700 "$WORK"
+KIT="$STAGE_ROOT/$REV8"
+rm -rf -- "$KIT"
+
+# ---------------------------------------------------------------- 下载并校验探针包
+say "[1/5] 下载探针包……"
+fetch_kit() {
+  "$CURL" -fsSL --retry 3 --retry-delay 2 --connect-timeout 15 "$@" -o "$WORK/kit.tar.gz" "$KIT_URL"
+}
+rc=0
+fetch_kit || rc=$?
+case "$rc" in
+  0) ;;
+  35|51|58|60|77)
+    say "  提示：本机不信任服务端 HTTPS 证书，改为忽略证书校验下载（包的完整性由下一步的 SHA-256 校验保证）。"
+    rc=0
+    fetch_kit -k || rc=$?
+    [ "$rc" = 0 ] || die "下载探针包失败（curl 退出码 $rc）：$KIT_URL" "请确认本机能访问该地址。"
+    ;;
+  *) die "下载探针包失败（curl 退出码 $rc）：$KIT_URL" "请确认本机能访问该地址，且平台已配置探针包目录。" ;;
+esac
+
+say "[2/5] 校验探针包……"
+read -r ACTUAL_SHA _ < <(sha256sum "$WORK/kit.tar.gz")
+[ "$ACTUAL_SHA" = "$KIT_SHA256" ] || die "探针包 SHA-256 与脚本中写死的值不一致，已中止。" \
+  "期望：$KIT_SHA256" "实际：$ACTUAL_SHA" "请重新生成接入命令，或联系平台管理员检查探针包目录。"
+
+LIST=$(tar -tzf "$WORK/kit.tar.gz") || die "探针包无法解压（文件损坏）。"
+if printf '%s\n' "$LIST" | grep -E '(^/|(^|/)\.\.(/|$))' >/dev/null; then
+  die "探针包含有不安全的路径，已中止。"
+fi
+install -d -m 0755 "$KIT"
+tar -xzf "$WORK/kit.tar.gz" -C "$KIT" --no-same-owner
+if [ "$TEST_MODE" != 1 ]; then
+  chown -R root:root "$KIT"
+fi
+chmod -R go-w "$KIT"
+# 本产品走 SHA-256 档位校验，不配置发布者信任，签名文件若存在需移走。
+rm -f -- "$KIT/manifest.sig"
+[ -f "$KIT/manifest.json" ] || die "探针包里没有 manifest.json。"
+read -r ACTUAL_MANIFEST _ < <(sha256sum "$KIT/manifest.json")
+[ "$ACTUAL_MANIFEST" = "$MANIFEST_SHA256" ] || die "manifest.json 的 SHA-256 与脚本中写死的值不一致，已中止。" \
+  "期望：$MANIFEST_SHA256" "实际：$ACTUAL_MANIFEST"
+[ -x "$KIT/runtime/bin/python3" ] || die "探针包缺少内置运行环境（runtime/bin/python3）。"
+[ -f "$KIT/tools/install-enterprise-linux.py" ] || die "探针包缺少安装器（tools/install-enterprise-linux.py）。"
+
+# 钉扎服务端自签证书用的配置（只含证书公钥与指纹，不是机密）。
+cat >"$WORK/tls-deployment.json" <<'JD_TLS_EOF'
+@@TLS_JSON@@
+JD_TLS_EOF
+chmod 0644 "$WORK/tls-deployment.json"
+
+INSTALLER_OUT=""
+INSTALLER_ERR=""
+run_installer() {
+  local rc=0
+  PYTHONDONTWRITEBYTECODE=1 "$KIT/runtime/bin/python3" -I -B "$KIT/tools/install-enterprise-linux.py" "$@" \
+    >"$WORK/installer.out" 2>"$WORK/installer.err" || rc=$?
+  INSTALLER_OUT=$(cat "$WORK/installer.out")
+  INSTALLER_ERR=$(cat "$WORK/installer.err")
+  return "$rc"
+}
+
+fail_installer() {
+  local step=$1
+  err "$step失败。"
+  [ -z "$INSTALLER_ERR" ] || printf '安装器输出：%s\n' "$INSTALLER_ERR" >&2
+  [ -z "$INSTALLER_OUT" ] || printf '%s\n' "$INSTALLER_OUT" >&2
+  case "$INSTALLER_ERR" in
+    *"enrollment failed"*)
+      say "可能的原因：接入码无效、已过期、已用完或已被撤销；或本机无法通过 HTTPS 访问 $SERVER（防火墙、证书、系统时间不同步）。" >&2
+      say "请在平台重新创建接入码后重试。" >&2 ;;
+    *"existing service or enrollment needs recovery"*)
+      say "可能的原因：本机存在未完成的安装或残留的接入状态。请联系平台管理员处理，必要时加 --switch 重试。" >&2 ;;
+    *"already installed"*)
+      say "本机已安装采集器。请加 --switch 重新接入，或去掉接入码仅做升级。" >&2 ;;
+    *"已绑定"*)
+      say "本机已绑定其他服务端，请加 --switch 后重试。" >&2 ;;
+  esac
+  exit 1
+}
+
+# ---------------------------------------------------------------- 安装
+if [ "$UNBIND" = 1 ]; then
+  say "[3/5] 解除本机原有绑定……"
+  run_installer unbind || fail_installer "解除原有绑定"
+fi
+
+if [ "$MODE" = install ]; then
+  say "[3/5] 登记终端……"
+  install -m 0600 /dev/null "$WORK/token"
+  printf '%s\n' "$CODE" >"$WORK/token"
+  CODE=""
+  if run_installer install --kit "$KIT" --manifest-sha256 "$MANIFEST_SHA256" --server "$SERVER" \
+      --server-kind jiandun --tls-config "$WORK/tls-deployment.json" --token-file "$WORK/token"; then
+    rm -f -- "$WORK/token"
+  else
+    rm -f -- "$WORK/token"
+    fail_installer "登记终端"
+  fi
+else
+  say "[3/5] 升级探针包……"
+  run_installer upgrade --kit "$KIT" --manifest-sha256 "$MANIFEST_SHA256" || fail_installer "升级探针包"
+fi
+
+# ---------------------------------------------------------------- 真机测评
+EVAL_STATE="未开启"
+EVAL_NOTE=""
+if [ "$ENABLE_EVAL" = 1 ]; then
+  say "[4/5] 开启真机测评能力……"
+  "$SYSTEMCTL" stop "$SERVICE" || true
+  eval_rc=0
+  PYTHONDONTWRITEBYTECODE=1 "$KIT/runtime/bin/python3" -I -B "$BASE_DIR/current/tools/platform-collector.py" \
+    --state "$STATE_DIR" set-eval-enabled on >"$WORK/eval.out" 2>"$WORK/eval.err" || eval_rc=$?
+  "$SYSTEMCTL" start "$SERVICE" || say "  警告：采集服务启动失败，请执行 systemctl status $SERVICE 查看原因。"
+  if [ "$eval_rc" = 0 ]; then
+    EVAL_STATE="已开启"
+    found=""
+    if [ -f "$EVAL_REGISTRY" ]; then
+      for product in @@EVAL_PRODUCTS@@; do
+        if grep -F "\"$product\"" "$EVAL_REGISTRY" >/dev/null; then found="$found $product"; fi
+      done
+    fi
+    if [ -n "$found" ]; then
+      EVAL_NOTE="已发现可测评的智能体：${found# }"
+    else
+      EVAL_NOTE="尚未发现已登记的受支持智能体，暂时无法执行真机测评；请安装智能体后重新运行终端安装包登记。"
+    fi
+    if ! grep -F '"eval_user"' "$STATE_DIR/collector.json" >/dev/null 2>&1; then
+      EVAL_NOTE="$EVAL_NOTE 未能识别测评所属的登录用户：请用登录用户执行 sudo，而不是直接以 root 登录运行。"
+    fi
+  else
+    EVAL_STATE="开启失败"
+    EVAL_NOTE="$(cat "$WORK/eval.err")"
+  fi
+else
+  say "[4/5] 跳过真机测评（如需开启，重新运行本脚本并加 --enable-eval）"
+fi
+
+# ---------------------------------------------------------------- 结果
+say "[5/5] 检查服务状态……"
+SERVICE_STATE="未知"
+if "$SYSTEMCTL" is-active --quiet "$SERVICE" 2>/dev/null; then SERVICE_STATE="运行中"; else SERVICE_STATE="未运行"; fi
+
+say ""
+if [ "$MODE" = install ]; then
+  say "接入成功。"
+else
+  say "升级完成（本机原已接入，未使用接入码）。"
+fi
+say "  服务端：$SERVER"
+say "  证书指纹（SHA-256）：$CERT_SHA256"
+say "  采集服务：$SERVICE_STATE"
+say "  真机测评：$EVAL_STATE"
+[ -z "$EVAL_NOTE" ] || say "  说明：$EVAL_NOTE"
+say "  本机将在几分钟内出现在平台「评估中心 -> 终端」清单中。"
+if [ "$SERVICE_STATE" != "运行中" ]; then
+  say "  注意：采集服务当前未运行，请执行 systemctl status $SERVICE 查看原因。"
+  exit 1
+fi

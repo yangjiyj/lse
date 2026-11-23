@@ -1,0 +1,44 @@
+# 大模型安全评估平台 —— 统一入口：静态前端 + /api 反代后端
+{
+	auto_https disable_redirects
+	default_sni localhost
+	fallback_sni localhost
+}
+
+(app_routes) {
+	encode gzip zstd
+
+	# 后端 API 与终端测评诱饵接收端：保留原始路径
+	@api path /api/* /sink/*
+	handle @api {
+		reverse_proxy api:8090
+	}
+
+	# 前端 SPA：history 路由回退到 index.html
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+:80 {
+	import app_routes
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+https://localhost,
+https:// {
+	tls internal
+
+	import app_routes
+
+	log {
+		output stdout
+		format console
+	}
+}

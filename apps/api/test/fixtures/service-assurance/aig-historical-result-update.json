@@ -1,0 +1,25 @@
+{
+  "event": "resultUpdate",
+  "result": {
+    "status": "completed",
+    "results": {
+      "target": {
+        "name": "受控普通 API 网关",
+        "url": "https://gateway.example.invalid/v1"
+      },
+      "components": [
+        {
+          "name": "NVIDIA Triton Inference Server",
+          "confidence": 0.67
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "id": "CVE-2099-0001",
+          "title": "仅用于迁移回归的历史关联项"
+        }
+      ],
+      "total": 32
+    }
+  }
+}

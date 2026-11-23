@@ -1,0 +1,136 @@
+{
+  "llm": {
+    "name": "OWASP Top 10 for LLM Applications",
+    "version": "2025",
+    "sourceUrl": "https://genai.owasp.org/llm-top-10/",
+    "items": [
+      {
+        "id": "LLM01",
+        "nameEn": "Prompt Injection",
+        "nameZh": "提示词注入",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM02",
+        "nameEn": "Sensitive Information Disclosure",
+        "nameZh": "敏感信息泄露",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM03",
+        "nameEn": "Supply Chain",
+        "nameZh": "供应链",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM04",
+        "nameEn": "Data and Model Poisoning",
+        "nameZh": "数据与模型投毒",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM05",
+        "nameEn": "Improper Output Handling",
+        "nameZh": "输出处理不当",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM06",
+        "nameEn": "Excessive Agency",
+        "nameZh": "过度代理",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM07",
+        "nameEn": "System Prompt Leakage",
+        "nameZh": "系统提示泄露",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM08",
+        "nameEn": "Vector and Embedding Weaknesses",
+        "nameZh": "向量与嵌入弱点",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM09",
+        "nameEn": "Misinformation",
+        "nameZh": "错误信息",
+        "translation": "平台译名"
+      },
+      {
+        "id": "LLM10",
+        "nameEn": "Unbounded Consumption",
+        "nameZh": "无限制消耗",
+        "translation": "平台译名"
+      }
+    ]
+  },
+  "agentic": {
+    "name": "OWASP Top 10 for Agentic Applications",
+    "version": "2025-12",
+    "sourceUrl": "https://genai.owasp.org/2025/12/09/owasp-top-10-for-agentic-applications-the-benchmark-for-agentic-security-in-the-age-of-autonomous-ai/",
+    "items": [
+      {
+        "id": "ASI01",
+        "nameEn": "Agent Goal Hijack",
+        "nameZh": "智能体目标劫持",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI02",
+        "nameEn": "Tool Misuse & Exploitation",
+        "nameZh": "工具滥用与利用",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI03",
+        "nameEn": "Identity & Privilege Abuse",
+        "nameZh": "身份与权限滥用",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI04",
+        "nameEn": "Agentic Supply Chain Vulnerabilities",
+        "nameZh": "智能体供应链漏洞",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI05",
+        "nameEn": "Unexpected Code Execution (RCE)",
+        "nameZh": "非预期代码执行",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI06",
+        "nameEn": "Memory & Context Poisoning",
+        "nameZh": "记忆与上下文投毒",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI07",
+        "nameEn": "Insecure Inter-Agent Communication",
+        "nameZh": "不安全的智能体间通信",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI08",
+        "nameEn": "Cascading Failures",
+        "nameZh": "级联故障",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI09",
+        "nameEn": "Human-Agent Trust Exploitation",
+        "nameZh": "人机信任利用",
+        "translation": "平台译名"
+      },
+      {
+        "id": "ASI10",
+        "nameEn": "Rogue Agents",
+        "nameZh": "失控智能体",
+        "translation": "平台译名"
+      }
+    ]
+  }
+}

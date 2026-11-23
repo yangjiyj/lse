@@ -1,0 +1,49 @@
+{
+  "name": "llm-safety-eval-platform",
+  "version": "1.0.8",
+  "private": true,
+  "description": "上线前大模型安全评估平台「鉴盾」（闭源商业产品）",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "dev": "pnpm -r --parallel --if-present dev",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio"
+  },
+  "prisma": {
+    "schema": "apps/api/prisma/schema.prisma",
+    "seed": "tsx apps/api/prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@prisma/client": "^6.2.0",
+    "@types/node": "^22.10.5",
+    "prettier": "^3.4.2",
+    "prisma": "^6.2.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "brace-expansion@1.1.15": "1.1.18",
+      "brace-expansion@2.1.1": "2.1.4",
+      "ioredis": "5.10.1",
+      "uuid": "11.1.1",
+      "esbuild": "0.28.1",
+      "form-data": "4.0.6",
+      "fast-uri": "3.1.6",
+      "find-my-way": "9.9.0",
+      "ip-address": "10.7.0"
+    }
+  }
+}

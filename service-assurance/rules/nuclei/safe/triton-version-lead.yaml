@@ -1,0 +1,28 @@
+id: lse-triton-product-fingerprint
+
+info:
+  name: NVIDIA Triton Inference Server Product Lead
+  author: lse
+  severity: info
+  description: Records a product-name-only lead without asserting a version or vulnerability.
+  metadata:
+    component-name: 'NVIDIA Triton 推理服务'
+    customer-title: '疑似组件、待核验线索'
+    customer-summary: '疑似识别到 NVIDIA Triton 推理服务，但未取得版本或验证证据。'
+    lse-evidence: lead
+    product: triton
+  tags: lse,safe,tech
+
+http:
+  - method: GET
+    path:
+      - '{{RootURL}}/v2/health/ready'
+    redirects: false
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: dsl
+        dsl:
+          - "contains(to_lower(all_headers), 'server: triton-inference-server')"

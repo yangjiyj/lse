@@ -1,0 +1,3519 @@
+{
+  "schema_version": "aiprobe.report.v1",
+  "report_id": "test-report",
+  "endpoint_id": "test-endpoint",
+  "host": {
+    "hostname": "test-host",
+    "username": "test-user",
+    "ip": "192.0.2.10",
+    "mac": "02:00:00:00:00:01",
+    "serial": "test-serial"
+  },
+  "status": "partial",
+  "scanned_at": "2026-10-23T14:08:00Z",
+  "collectors": [
+    {
+      "name": "homes",
+      "status": "complete"
+    },
+    {
+      "name": "host",
+      "status": "complete"
+    },
+    {
+      "name": "process",
+      "status": "complete"
+    },
+    {
+      "name": "netsock",
+      "status": "complete"
+    },
+    {
+      "name": "agents",
+      "status": "partial",
+      "error_code": "collector_error"
+    },
+    {
+      "name": "apps",
+      "status": "complete"
+    },
+    {
+      "name": "browser_extensions",
+      "status": "complete"
+    },
+    {
+      "name": "container",
+      "status": "complete"
+    },
+    {
+      "name": "schedule",
+      "status": "complete"
+    },
+    {
+      "name": "modelsvc",
+      "status": "complete"
+    }
+  ],
+  "assets": [
+    {
+      "kind": "cli_agent",
+      "name": "claude-code",
+      "version": "2.1.126",
+      "source_id": "test-asset-000",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "auto_approval": "unknown",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "auto_approval_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "credential_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "permission_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "model_destination_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:9640c3f7d5b076284541ae5f0d0dec1c602cf06fa46257b881cf1147098b2e9b"
+      }
+    },
+    {
+      "kind": "cli_agent",
+      "name": "claude-code",
+      "version": "2.1.126",
+      "source_id": "test-asset-001",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "auto_approval": "unknown",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "auto_approval_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "credential_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "permission_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "model_destination_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:9640c3f7d5b076284541ae5f0d0dec1c602cf06fa46257b881cf1147098b2e9b"
+      }
+    },
+    {
+      "kind": "cli_agent",
+      "name": "claude-code",
+      "version": "2.1.126",
+      "source_id": "test-asset-002",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "auto_approval": "unknown",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "auto_approval_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "credential_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "permission_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "destination_not_reviewed",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:9640c3f7d5b076284541ae5f0d0dec1c602cf06fa46257b881cf1147098b2e9b"
+      }
+    },
+    {
+      "kind": "cli_agent",
+      "name": "claude-code",
+      "version": "2.1.308",
+      "source_id": "test-asset-003",
+      "evidence": {
+        "config": {
+          "permission_mode": "bypassPermissions",
+          "auto_approval": "enabled",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "auto_approval_enabled",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "credential_literal",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "permission_bypass",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "unknown",
+              "severity": "medium",
+              "evidence_code": "mcp_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "destination_not_reviewed",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "finding",
+              "severity": "medium",
+              "evidence_code": "skill_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [
+          {
+            "name": "ppt",
+            "scope": "user",
+            "transport": "stdio",
+            "static_assessment": {
+              "checks": [
+                {
+                  "rule_id": "mcp.authorization",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_no_auth_fields",
+                  "reason_zh": "终端已完成此项静态检查。"
+                },
+                {
+                  "rule_id": "mcp.credential",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_credential_not_matched",
+                  "reason_zh": "终端已完成此项静态检查。"
+                },
+                {
+                  "rule_id": "mcp.dependency",
+                  "status": "unknown",
+                  "severity": "info",
+                  "evidence_code": "mcp_dependency_unknown",
+                  "reason_zh": "终端未提供完成此项检查所需的信息。"
+                },
+                {
+                  "rule_id": "mcp.descriptions",
+                  "status": "unknown",
+                  "severity": "info",
+                  "evidence_code": "mcp_descriptions_uncollected",
+                  "reason_zh": "终端未提供完成此项检查所需的信息。"
+                },
+                {
+                  "rule_id": "mcp.launch",
+                  "status": "unknown",
+                  "severity": "medium",
+                  "evidence_code": "mcp_launch_unverified",
+                  "reason_zh": "终端未提供完成此项检查所需的信息。"
+                },
+                {
+                  "rule_id": "mcp.source",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_source_fingerprinted",
+                  "reason_zh": "终端已完成此项静态检查。"
+                },
+                {
+                  "rule_id": "mcp.transport",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_stdio_transport",
+                  "reason_zh": "终端已完成此项静态检查。"
+                }
+              ]
+            }
+          }
+        ],
+        "skills": [],
+        "install_path_hash": "sha256:2d1c540928bb66b5a7f0f3316cca3766ef52a9d74404f139b2e772bcc5e65fe2"
+      }
+    },
+    {
+      "kind": "cli_agent",
+      "name": "codex",
+      "version": "0.160.1",
+      "source_id": "test-asset-004",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "auto_approval": "unknown",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "auto_approval_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "credential_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "permission_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "model_destination_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:d12d812144fef3779fd1e7eb022ecf473c67b08712a651ac177d3960701ad2c1"
+      }
+    },
+    {
+      "kind": "cli_agent",
+      "name": "hermes",
+      "version": "version_unknown",
+      "source_id": "test-asset-005",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "auto_approval": "unknown",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "auto_approval_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "credential_literal",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "permission_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "destination_not_reviewed",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:8a9a3b3b7a76f18863cc745825be5136f3b3f34df813af8ce159ec1561425ccf"
+      }
+    },
+    {
+      "kind": "cli_agent",
+      "name": "openclaw",
+      "version": "2026.9.5",
+      "source_id": "test-asset-006",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "auto_approval": "unknown",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "auto_approval_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "credential_literal",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "permission_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "destination_not_reviewed",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:ce2563ccf3ee9fd858cca63c5a6c22dc2b97dda65cdd8bcd0c76518860249d25"
+      }
+    },
+    {
+      "kind": "cli_agent",
+      "name": "opencode",
+      "version": "version_unknown",
+      "source_id": "test-asset-007",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "auto_approval": "unknown",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "auto_approval_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "credential_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "permission_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "model_destination_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:21e09ef902792e6619ba8f91cfb785c7d05d46a54354dc94e26235738c496abe"
+      }
+    },
+    {
+      "kind": "desktop_app",
+      "name": "测试对象-008",
+      "version": "version_unknown",
+      "source_id": "test-asset-008",
+      "evidence": {
+        "config": {
+          "permission_mode": "bypassPermissions",
+          "auto_approval": "enabled",
+          "sandbox_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "config.auto_approval",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "auto_approval_enabled",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "config.credential",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "credential_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "config.permission",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "permission_bypass",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "config.sandbox",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "sandbox_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "mcp_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "model.exit",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "model_destination_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "proxy.route",
+              "status": "unknown",
+              "severity": "high",
+              "evidence_code": "proxy_route_unobserved",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "skill.aggregate",
+              "status": "pass",
+              "severity": "medium",
+              "evidence_code": "skill_no_known_findings",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:f9e1fd08d03c1f8e3d1897cd80c9378d4c8d20b93764260677a58ee40422ad91"
+      }
+    },
+    {
+      "kind": "instruction_file",
+      "name": "测试对象-009",
+      "version": "",
+      "source_id": "test-asset-009",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:360b51b8093c1c4b2e775b5141d9be27df40477478758e836344a3e9d226e950"
+      }
+    },
+    {
+      "kind": "instruction_file",
+      "name": "测试对象-010",
+      "version": "",
+      "source_id": "test-asset-010",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:5c049e2f1b0cf2419197275894d72824497449eba9201ce16cefb8e3fbf92797"
+      }
+    },
+    {
+      "kind": "mcp_server",
+      "name": "ppt",
+      "version": "",
+      "source_id": "test-asset-011",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "mcp.authorization",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "mcp_no_auth_fields",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "mcp.credential",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "mcp_credential_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "mcp.dependency",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "mcp_dependency_unknown",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.descriptions",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "mcp_descriptions_uncollected",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.launch",
+              "status": "unknown",
+              "severity": "medium",
+              "evidence_code": "mcp_launch_unverified",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            },
+            {
+              "rule_id": "mcp.source",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "mcp_source_fingerprinted",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "mcp.transport",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "mcp_stdio_transport",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "scope": "user",
+        "transport": "stdio",
+        "server_name": "ppt",
+        "mcp_servers": [
+          {
+            "name": "ppt",
+            "scope": "user",
+            "transport": "stdio",
+            "static_assessment": {
+              "checks": [
+                {
+                  "rule_id": "mcp.authorization",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_no_auth_fields",
+                  "reason_zh": "终端已完成此项静态检查。"
+                },
+                {
+                  "rule_id": "mcp.credential",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_credential_not_matched",
+                  "reason_zh": "终端已完成此项静态检查。"
+                },
+                {
+                  "rule_id": "mcp.dependency",
+                  "status": "unknown",
+                  "severity": "info",
+                  "evidence_code": "mcp_dependency_unknown",
+                  "reason_zh": "终端未提供完成此项检查所需的信息。"
+                },
+                {
+                  "rule_id": "mcp.descriptions",
+                  "status": "unknown",
+                  "severity": "info",
+                  "evidence_code": "mcp_descriptions_uncollected",
+                  "reason_zh": "终端未提供完成此项检查所需的信息。"
+                },
+                {
+                  "rule_id": "mcp.launch",
+                  "status": "unknown",
+                  "severity": "medium",
+                  "evidence_code": "mcp_launch_unverified",
+                  "reason_zh": "终端未提供完成此项检查所需的信息。"
+                },
+                {
+                  "rule_id": "mcp.source",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_source_fingerprinted",
+                  "reason_zh": "终端已完成此项静态检查。"
+                },
+                {
+                  "rule_id": "mcp.transport",
+                  "status": "pass",
+                  "severity": "info",
+                  "evidence_code": "mcp_stdio_transport",
+                  "reason_zh": "终端已完成此项静态检查。"
+                }
+              ]
+            }
+          }
+        ],
+        "skills": []
+      }
+    },
+    {
+      "kind": "model_service",
+      "name": "测试对象-012",
+      "version": "",
+      "source_id": "test-asset-012",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:b26993598dffd1f14aed97def57ef67f753518a9b773d8a12033c82b4fa545ca"
+      }
+    },
+    {
+      "kind": "platform_container",
+      "name": "测试对象-013",
+      "version": "",
+      "source_id": "test-asset-013",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:71329c4cc6e32171553fa81d044eb31d1a3aac52ba9376c4a99f4505c494cf5b"
+      }
+    },
+    {
+      "kind": "platform_container",
+      "name": "测试对象-014",
+      "version": "",
+      "source_id": "test-asset-014",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:71329c4cc6e32171553fa81d044eb31d1a3aac52ba9376c4a99f4505c494cf5b"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-015",
+      "version": "",
+      "source_id": "test-asset-015",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:df5cb6292077bcb80cc04ddc7992243aa4a8e5bd26c402f604ecca4a9f3f297a"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-016",
+      "version": "",
+      "source_id": "test-asset-016",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:8b33cf20cd2d617b5a84208aac9dceb0779654c8dfbeba67d3ded0ce21696cbc"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-017",
+      "version": "",
+      "source_id": "test-asset-017",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-018",
+      "version": "",
+      "source_id": "test-asset-018",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-019",
+      "version": "",
+      "source_id": "test-asset-019",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-020",
+      "version": "",
+      "source_id": "test-asset-020",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-021",
+      "version": "",
+      "source_id": "test-asset-021",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-022",
+      "version": "",
+      "source_id": "test-asset-022",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-023",
+      "version": "",
+      "source_id": "test-asset-023",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "scheduled_agent",
+      "name": "测试对象-024",
+      "version": "",
+      "source_id": "test-asset-024",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": []
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:52cb191886a0175bdb59b6053d33f54707124e7ad90fb5ba24ddb563b35f6c34"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-025",
+      "version": "",
+      "source_id": "test-asset-025",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:26a99ef79be3e0b6ef78510c7d263984b8805a2a24e0e51d6ed0eb35ce958ade"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-026",
+      "version": "",
+      "source_id": "test-asset-026",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:6c7c15a69bb6c6410ee5fa138dc035d757af4be01066aad64f05c86e865b1199"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-027",
+      "version": "",
+      "source_id": "test-asset-027",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:384684cf5def09108982063ad5e8bd092b426758c132999fcbb2bc38b95a1417"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-028",
+      "version": "",
+      "source_id": "test-asset-028",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:48dfd5eb20e6fd261be847c3aed5e7987a90aa8c3c0bd1ddc80a358bf4d450be"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-029",
+      "version": "",
+      "source_id": "test-asset-029",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:386fddd3cc2ab96c13d312408bb4129f88944a797e53698de51fbee4eefc9ed3"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-030",
+      "version": "",
+      "source_id": "test-asset-030",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:3451e35d8d91c59d0279d812601171377bf0b425177f2b98fffce0d7802d8577"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-031",
+      "version": "",
+      "source_id": "test-asset-031",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:37c7436770d72376716b7da7e17692989ccbd739da2e3df642d7f9c5cb020073"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-032",
+      "version": "",
+      "source_id": "test-asset-032",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:12a35f9df68bce12f5099f834bff2d3bab1a109ed9994ae9cdd30e55803967c3"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-033",
+      "version": "",
+      "source_id": "test-asset-033",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:403a12872835207467c53621e43ef1b19ca801de8e134467f820de2514fbf293"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-034",
+      "version": "",
+      "source_id": "test-asset-034",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:4120832e5038e4a8b073e33865f51d1d84488058c393b4dd33210b460941e175"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-035",
+      "version": "",
+      "source_id": "test-asset-035",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.credential_access",
+              "status": "finding",
+              "severity": "medium",
+              "evidence_code": "credential_access",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:13561a50d06b3b3230c804c8761e52cf47ddbf98d069536b80e82cc059c943af"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-036",
+      "version": "",
+      "source_id": "test-asset-036",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:2200346c1a0543eae55c908023e182755e5e0d76e256f7891aae337aa93af529"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-037",
+      "version": "",
+      "source_id": "test-asset-037",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:0c9c0a0b91a68b42b7281f71960b8562ceebd41330acb79f51cb33ea11df4475"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-038",
+      "version": "",
+      "source_id": "test-asset-038",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:b6d49e2e94e8aa697a2660cfc9805f522ac3066b534249fd5cc2db0f8f933f39"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-039",
+      "version": "",
+      "source_id": "test-asset-039",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:eaf82a972c3101997ebf435915fb198ad539e0219c62844fc875a9516943120a"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-040",
+      "version": "",
+      "source_id": "test-asset-040",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:c929781a0867f3874d4888abfa8a9e85700b8954ac10ebedfe13e313f81652cc"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-041",
+      "version": "",
+      "source_id": "test-asset-041",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:89fda1ad8dc02b004387b7daa7d03eb3edbdeec47ec8fd135934e91c057ffcb9"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-042",
+      "version": "",
+      "source_id": "test-asset-042",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:2efb9fcf130578f9c5dca0c3da7f7b6e777f8b19e6ec9f241b411839208facf1"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-043",
+      "version": "",
+      "source_id": "test-asset-043",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:cc1667ce948c7b7807dab1dd3285342246a8d58a2722ad28b0bf918b6604bc80"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-044",
+      "version": "",
+      "source_id": "test-asset-044",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:8691e5eddc03c2dc9a0ed841452d54f9521b1ce1c9dfaafd8c317d72192ceec0"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-045",
+      "version": "",
+      "source_id": "test-asset-045",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:65059ed499fc6f68ed6c5fec2ab10792aff078ff1348b519522f627171911bd2"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-046",
+      "version": "",
+      "source_id": "test-asset-046",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:ebd1c9c873e1e7867fe681f11ae8b31d99f3e0646fed7545a940453e9014df32"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-047",
+      "version": "",
+      "source_id": "test-asset-047",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:ea842b4d5776019de71d29c3075bfba1109c272df6bcc8aafe076d1c5b4eba40"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-048",
+      "version": "",
+      "source_id": "test-asset-048",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:4acccdb5d398c599f73e946a00ddedc13d4ad4abef24848bc532af929d43f4f3"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-049",
+      "version": "",
+      "source_id": "test-asset-049",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:021a67521d055af18b0887f0e23ffb49abb5a6b7c59098011ef9de2e03a90998"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-050",
+      "version": "",
+      "source_id": "test-asset-050",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:681676d4d187a594daa736f921e2eed649d112fddcff3fda82d53cb891107d2b"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-051",
+      "version": "",
+      "source_id": "test-asset-051",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:4dcd8fa6b03e76a33b5bfa5abec6c5759cb44192eee2dcc99d53177246541f0b"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-052",
+      "version": "1.0.0",
+      "source_id": "test-asset-052",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:a7de6a3cd2ba6d9667b85392f75f4bb411c621acd177a2d48794face327ac448"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-053",
+      "version": "",
+      "source_id": "test-asset-053",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.instruction_override",
+              "status": "finding",
+              "severity": "medium",
+              "evidence_code": "instruction_override",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:a1366a808d2876c530191d656a8c38eec29e6be8492da9d4c28aec5d9dc040a1"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-054",
+      "version": "",
+      "source_id": "test-asset-054",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:6e439ebc25085c3b62bd15c7a878d81dae56e0c724ba12b91be9822cf7cd3033"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-055",
+      "version": "",
+      "source_id": "test-asset-055",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:ba73d5ce784687c2f5660093dea8d0b50905ad95adf67fe8700596a7aa85add8"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-056",
+      "version": "",
+      "source_id": "test-asset-056",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:7a79f4ddcafb97fdcef98696d8a0ee64a5694d109423fa027e3bbf2d8fb018e9"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-057",
+      "version": "",
+      "source_id": "test-asset-057",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:04cc52191703147670436b7db9d75b867700cadc7908be9ec7b0b4bc41b6d3d9"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-058",
+      "version": "",
+      "source_id": "test-asset-058",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:038a9c8b65a3cc02c72c0c7fc5b560883ab31bd258cb4b0113acc34380e76a35"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-059",
+      "version": "",
+      "source_id": "test-asset-059",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:91c2aae396184a600b7c98d8d9ae7e4f589e3907ac850795b7a5b570800b7b50"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-060",
+      "version": "",
+      "source_id": "test-asset-060",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:8d171deab042049eb498c3d42131f7dc485868fe500a78ed456d62d5d4c8de5f"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-061",
+      "version": "",
+      "source_id": "test-asset-061",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:21f61340917ff51200ac94e9ecff75e1dd305f8e1c4a310d7aa97d75b9c141b6"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-062",
+      "version": "",
+      "source_id": "test-asset-062",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:b3fb4051237ef16fc1d0eb0b5566e46b6d67583fdd4c40a71aed8c74ece21fca"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-063",
+      "version": "",
+      "source_id": "test-asset-063",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:53a957b36fe252285249315726f1581e0d5033d4236deaa4e6d0beb1ca22b0c7"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-064",
+      "version": "",
+      "source_id": "test-asset-064",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:fdf31b32a1778b9f96036079d44d0ba598b257a21854076656d534c14c1879de"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-065",
+      "version": "",
+      "source_id": "test-asset-065",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:3e13e71217c7f5b9f5566c680ccd0cf6daad13b07e302734edfeadac181a8ecb"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-066",
+      "version": "",
+      "source_id": "test-asset-066",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:dd41c209d702d46de076d13bbb4c2b0e719e76f17f1cabd0d8ff835003566ac3"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-067",
+      "version": "",
+      "source_id": "test-asset-067",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:9ea6ae6c50bfb5a3010fc6548f02b41dd308ecccb45ac195d248bf0f74e19e68"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-068",
+      "version": "",
+      "source_id": "test-asset-068",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:dce62b4c649b0ffa1a3ddae0dc723d9933bf46a48a4da8c35ee88c8c1cc366f8"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-069",
+      "version": "",
+      "source_id": "test-asset-069",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:67c778a74150ecb2c60cfd6c0f122f3961d2ab3180e7002c688e6a7d6b075643"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-070",
+      "version": "",
+      "source_id": "test-asset-070",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:de2cd7fe2406ca72ceab0335e09786e70ed78328a5fcea02b98a31aae76c5163"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-071",
+      "version": "",
+      "source_id": "test-asset-071",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:5074682caa35762df4d3fdb314bacbcbfb4bc506cc1459a85fffa6ba0c35497b"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-072",
+      "version": "",
+      "source_id": "test-asset-072",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:a6b62e89c48e999433c56dd5a171066af5350ad7adf8d1e40c6fa59d9a12ee4a"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-073",
+      "version": "",
+      "source_id": "test-asset-073",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:fea8cebb1377cf9ce425a97e6cb269afffcaaea82ce0e4f7b94df81c40f34652"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-074",
+      "version": "",
+      "source_id": "test-asset-074",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:b23760aa5e1d24e85013354d8937e2a98f94aefe77a067ff3e13f42e509fb436"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-075",
+      "version": "",
+      "source_id": "test-asset-075",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:1c5c650815c2d1c20038d1bb7a735ad6d3bc29f7bedfbc3ba56b64db9a232f3a"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-076",
+      "version": "",
+      "source_id": "test-asset-076",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:bc8edba5d8c424023a129251ca5dc239492698fc53497630e8749da07a740dd7"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-077",
+      "version": "",
+      "source_id": "test-asset-077",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:e24de82708e0050e750a2572f16e3fb7a9954c8810a885f591fa6fef0310b119"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-078",
+      "version": "",
+      "source_id": "test-asset-078",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:7ddb96a3d4efdc4eec444730916da6103f9d24bd7f36121452bc495bde7b0388"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-079",
+      "version": "",
+      "source_id": "test-asset-079",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:05727288038ea5b039ac88b1a2a11e59026e60f37f294e11c993d8f2fb4917b3"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-080",
+      "version": "",
+      "source_id": "test-asset-080",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:3a09d4b6e751325f76710a984c5d2db4193d3257d8664c8e307e0c7c17029d4b"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-081",
+      "version": "",
+      "source_id": "test-asset-081",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:abb66b34b7d4d79504f03a1196aafd6346e6858b0125d59667cd1729c0b4d73b"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-082",
+      "version": "",
+      "source_id": "test-asset-082",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:db8b9500ba757e061e1ac205dcc20570e2ab9965e57e088f264f2bfb0a3f4931"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-083",
+      "version": "",
+      "source_id": "test-asset-083",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:2fc2e2ee446ef38115c66d41afbd3c1a27ceb38fdc678d3893e107f15caf1c62"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-084",
+      "version": "",
+      "source_id": "test-asset-084",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:22d6dccd441f744c797b60fb8a0c0d123d6a17f619b6be75ae8c4a2ace615a71"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-085",
+      "version": "1.0.0",
+      "source_id": "test-asset-085",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:7d8ffcacfa9bf12806032223b2af50a8920517987a4a7731604d723e795dab79"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-086",
+      "version": "",
+      "source_id": "test-asset-086",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:61432e6b64f133fb7500de6af6653b4d5eb94f7b553dd87b8bd68eab9868a4ac"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-087",
+      "version": "",
+      "source_id": "test-asset-087",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:474d139bb7db0105cd6b53da97e0b3ef8f128c292ad879437c4fd594d46bafee"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-088",
+      "version": "",
+      "source_id": "test-asset-088",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:72e53db4d02235699e144067e4846ac4649a159b5f9d279a5488bd94e4ba0708"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-089",
+      "version": "",
+      "source_id": "test-asset-089",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:01d071da18aa225f87703f5d4b7e52d5f776c165a2dd4bd12eb776520cd9c275"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-090",
+      "version": "",
+      "source_id": "test-asset-090",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:939667c5d93d85f07ae6a91aab97593695ae088d12833997e9ada410153aaa89"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-091",
+      "version": "",
+      "source_id": "test-asset-091",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:6927ae33f9b353d73c95fe26759ac58a661bf3e9ab6594d5cbebaa48cf107fbf"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-092",
+      "version": "",
+      "source_id": "test-asset-092",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:558a1d011d9152117eac36e6f99916d3a2e6d3347ba9b91df2d11d7c3124b1b5"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-093",
+      "version": "",
+      "source_id": "test-asset-093",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:9a910e70f22abe6d7342cad7aab4f74c9446e464bbbab31dd6a1decac55d8b9e"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-094",
+      "version": "",
+      "source_id": "test-asset-094",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:039b1ffbc39a83da35e19974f0ecc8721bf0aea56d9769f04f545967975536a8"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-095",
+      "version": "",
+      "source_id": "test-asset-095",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:ad335747466654d063dbf9d227fade94aeb1a673c4561a2487ccc4d7657724fc"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-096",
+      "version": "",
+      "source_id": "test-asset-096",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:3aa21a49d1175ef5bd8b5b52c09ecfe4d5f4ab584021af6ba50d6ac9c3d96688"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-097",
+      "version": "",
+      "source_id": "test-asset-097",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:d1ef953f73b21b6b64b24ef28499f254d8a7c9d029e93267d95c6f7090611aa4"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-098",
+      "version": "",
+      "source_id": "test-asset-098",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:603834a93a4bb6fb45e822d91f7781f81d74d526c66216f35d25327d1b8d759d"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-099",
+      "version": "",
+      "source_id": "test-asset-099",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:a28ebbc6bfad5e7751cd3dad36927603418ed88ccdbe7239b63efe6e9d1af8b6"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-100",
+      "version": "7.0.0",
+      "source_id": "test-asset-100",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.destructive_delete",
+              "status": "finding",
+              "severity": "high",
+              "evidence_code": "recursive_delete",
+              "reason_zh": "终端已完成此项静态检查。"
+            },
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:6cef5ee4fe158d60e8bf9c7f04b656d623121b56f60ee60b196fc18c381b5b7d"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-101",
+      "version": "",
+      "source_id": "test-asset-101",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:44c5f41f28b867c3a86ee4cdab115f801eb275e9849976e709e36bc271ac4ecd"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-102",
+      "version": "",
+      "source_id": "test-asset-102",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:080fefb911c4cb2c2daada2a4f3862d2415da9cd330566e8552ac998a14d6dac"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-103",
+      "version": "",
+      "source_id": "test-asset-103",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:a5bc3042a81ec559ec97882e9f8ae04f8d5df41c117b6da22dd1bd2cd964ea17"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-104",
+      "version": "",
+      "source_id": "test-asset-104",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:828eb7769ea9773ed532ccbc6e53d3b11b20e9c4a9f9e9850f435005d0cd2bf5"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-105",
+      "version": "",
+      "source_id": "test-asset-105",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:1ef92d36b5d1e194b0566d0ef18be7f303a6d2229bd9d8990f8352d76e66e4c0"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-106",
+      "version": "",
+      "source_id": "test-asset-106",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:c60b8438e12f1425acc3d33297c68a41be787fd905b0a415733a37dbd7ec6356"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-107",
+      "version": "",
+      "source_id": "test-asset-107",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:aec49fc45bd6583578082b61afc947f3f24774f9fb2f504e78bf3bf8170e6e0e"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-108",
+      "version": "",
+      "source_id": "test-asset-108",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:ed2f0cec6a4d19bdd07df9682b97dbc58e5438d0ae942cc6ae1216367452df5f"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-109",
+      "version": "",
+      "source_id": "test-asset-109",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:d564f0badde3bc42310a6b7a5d01c2ed05ba7f5d98a5e8f41dc10ded485eb56c"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-110",
+      "version": "",
+      "source_id": "test-asset-110",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:2c3d35f6b5ce1349aea507cf2bbcd4627c22a1722e601fc23dcdb64f4b5bc133"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-111",
+      "version": "",
+      "source_id": "test-asset-111",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "unknown",
+              "severity": "info",
+              "evidence_code": "script_scan_partial",
+              "reason_zh": "终端未提供完成此项检查所需的信息。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:059b6d74c20a68de29ca3a51e5161c0e67b2f7dfe9dd77fc1cf62e73df02deb5"
+      }
+    },
+    {
+      "kind": "skill",
+      "name": "技能-112",
+      "version": "",
+      "source_id": "test-asset-112",
+      "evidence": {
+        "config": {
+          "permission_mode": "unknown",
+          "hooks_present": false
+        },
+        "static_assessment": {
+          "checks": [
+            {
+              "rule_id": "skill.script_patterns",
+              "status": "pass",
+              "severity": "info",
+              "evidence_code": "script_pattern_not_matched",
+              "reason_zh": "终端已完成此项静态检查。"
+            }
+          ]
+        },
+        "mcp_servers": [],
+        "skills": [],
+        "install_path_hash": "sha256:ee63331a3758ddcf1ea2fb6db6ba32f89135874e2f153a675aeab2bf60872b57"
+      }
+    }
+  ]
+}

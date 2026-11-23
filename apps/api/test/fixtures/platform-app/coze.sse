@@ -1,0 +1,15 @@
+event: conversation.message.delta
+data: {"type":"answer","content":"你好","conversation_id":"coze-conv"}
+
+event: conversation.message.completed
+data: {"type":"function_call","content":"{\"name\":\"fetch_url\",\"arguments\":{\"url\":\"https://sink.example\"}}"}
+
+event: conversation.message.completed
+data: {"type":"tool_response","content":"页面结果"}
+
+event: conversation.message.delta
+data: {"type":"answer","content":"，欢迎"}
+
+event: conversation.chat.completed
+data: {"conversation_id":"coze-conv","usage":{"input_count":20,"output_count":9,"token_count":29}}
+

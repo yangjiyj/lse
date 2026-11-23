@@ -1,0 +1,58 @@
+AI 服务安全核验 SBOM 受控验收证据
+
+模式: 组件清单核验
+受控目标: 固定 CycloneDX 受影响、修复版本与缺版本样本
+
+场景: 受影响版本
+状态: PARTIAL
+覆盖: INCOMPLETE
+正式风险: 7
+待核验线索: 0
+不受影响: 4
+已修复: 0
+覆盖不完整: 是
+证据哈希:
+- 064e45772d803afde0885d0217d51990831f2d557b7ff254514ecd1b72a4ebdf
+- 1b7ae3f07aeeb391a45103e9df57fbd9c1bc9dedbfa128da9b1bdd34c939da2b
+- 205f095d52668c4c0888821e769cbfff3e898676de303206580cc7320122df8e
+- 3065bf09ee568d6da9ff45965b6a06f724e9500b61993efcbf58b4c3fb410971
+- 41e8c1d112a8a802e160e68d9e3439dad1cd2f0f2d9fff2e85fd80af25b22886
+- 78d01a57c47a79ae133ee755c54e81bcc9525cfad8393c86d4f45bf94c9b398a
+- 87c50f3107c41fff1bfdfc1a994acb4ffba39a1057301c3c9b7f42b05249612c
+- 891109982258c819616e0869c4100d617d149e07d10db11370d6ad572d5bbb13
+- e01e0f91f579b2aedd7096eb0fc9ff7214b4c4952860cedf3040cebf177d31a3
+- eaa02cff6bcb336b1e393782fe8a21953fe9138d9ee7829d82a9827f45c4b847
+- ff872ef6612363fbdf3ff8ad93e7d52ef5c357bba2e2e356470c6535f17ee081
+
+场景: 不支持生态导致覆盖不完整
+状态: PARTIAL
+覆盖: INCOMPLETE
+正式风险: 7
+待核验线索: 1
+不受影响: 4
+已修复: 0
+覆盖不完整: 是
+证据哈希:
+- 无
+
+场景: 修复版本
+状态: PARTIAL
+覆盖: INCOMPLETE
+正式风险: 0
+待核验线索: 0
+不受影响: 11
+已修复: 0
+覆盖不完整: 是
+证据哈希:
+- 无
+
+场景: 缺版本线索
+状态: PARTIAL
+覆盖: INCOMPLETE
+正式风险: 0
+待核验线索: 2
+不受影响: 0
+已修复: 0
+覆盖不完整: 是
+证据哈希:
+- 无

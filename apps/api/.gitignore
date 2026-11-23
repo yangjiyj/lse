@@ -1,0 +1,2 @@
+# 裁判准确率 harness 的人工纠错工作区（候选真值，不入仓）
+test/judge-accuracy/.candidates/

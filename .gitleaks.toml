@@ -1,0 +1,33 @@
+title = "LLM Safety Eval Platform gitleaks allowlist"
+
+[[allowlists]]
+description = "Fake OpenAI-style API keys used by backend tests"
+condition = "AND"
+paths = [
+  '''^apps/api/test/(eval-tasks|judge-pipeline|model-targets|reports)\.test\.ts$''',
+]
+regexes = [
+  '''sk-secret-[A-Za-z0-9-]+''',
+]
+
+[[allowlists]]
+description = "Fake private-key snippets used by sensitive-info scanner tests"
+condition = "AND"
+paths = [
+  '''^apps/api/test/judge\.test\.ts$''',
+  '''^engines/python-judge/test_scanner\.py$''',
+]
+regexes = [
+  '''-----BEGIN PRIVATE KEY-----''',
+]
+
+[[allowlists]]
+description = "Fake AWS and generic secret examples used by python scanner tests"
+condition = "AND"
+paths = [
+  '''^engines/python-judge/test_scanner\.py$''',
+]
+regexes = [
+  '''AKIAIOSFODNN7EXAMPLE''',
+  '''abcd1234efgh5678ijkl''',
+]

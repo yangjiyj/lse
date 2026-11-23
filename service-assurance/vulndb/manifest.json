@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "artifact": "trivy-db",
+  "version": "trivy-db-2026.08.30T070529Z",
+  "source": {
+    "uri": "ghcr.io/aquasecurity/trivy-db:2",
+    "manifestDigest": "sha256:9d3b66601a0d6dc18dc7f5ab59257fcc9b1f7f73f64e632f303a0594967a4d3a",
+    "layerDigest": "sha256:96b6b47116c081fdf033f809b93b43686894b708acc5f9f177f2f6986e48d1fb"
+  },
+  "license": "Aqua Trivy vulnerability database sources and licenses as documented by upstream",
+  "updatedAt": "2026-08-30T07:05:29Z",
+  "sha256": "sha256:542d1ae089c1070990372d1416416f2a3e699f0c5c12fbc1cafe37071c00e27d",
+  "files": [
+    {
+      "path": "db/metadata.json",
+      "sha256": "sha256:a01306e93daa6e2ed559cbf5a0c591ba82c4e86122991a31e4680d269bb56ed3"
+    },
+    {
+      "path": "db/trivy.db",
+      "sha256": "sha256:389181324022b0b85f32a62ead5a6a291ae3f8fa674906d9fdfbe6c22d4a127f"
+    }
+  ],
+  "signature": {
+    "required": true,
+    "algorithm": "rsa-sha256"
+  }
+}

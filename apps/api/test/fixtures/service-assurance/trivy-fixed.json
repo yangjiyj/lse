@@ -1,0 +1,26 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.70.0"
+  },
+  "CreatedAt": "2026-08-30T14:16:31.14123316+08:00",
+  "ArtifactName": "cyclonedx-triton-fixed.json",
+  "ArtifactType": "cyclonedx",
+  "Results": [
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Packages": [
+        {
+          "ID": "org.apache.logging.log4j:log4j-core:2.25.4",
+          "Name": "org.apache.logging.log4j:log4j-core",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.4"
+          },
+          "Version": "2.25.4"
+        }
+      ]
+    }
+  ]
+}

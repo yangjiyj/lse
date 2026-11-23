@@ -1,0 +1,13 @@
+误报反例夹具：扫描结果不应出现中危及以上（chatglm3 modeling_chatglm.py 第 1035 行 eval(content) 除外，那是真实风险）。
+只被读取做静态检查，测试不执行其中任何代码。
+
+hf/<组织>__<仓库>/<路径>：2026-11-21 从 Hugging Face 各仓库 main 分支原样下载，许可证见各仓库：
+  zai-org/chatglm3-6b                 代码 Apache-2.0
+  internlm/internlm2_5-7b-chat        代码 Apache-2.0
+  deepseek-ai/DeepSeek-V3             代码 MIT
+  baichuan-inc/Baichuan2-7B-Chat      代码 Apache-2.0
+  microsoft/Phi-3-mini-4k-instruct    MIT
+  zai-org/GLM-4.5-Air                 MIT
+  Qwen/Qwen3-8B                       Apache-2.0
+
+handmade/：按常见写法手写的正常文件（推理启动脚本、安装脚本、LLaMA-Factory 训练配置、docker-compose、CI 配置、普通宏）。

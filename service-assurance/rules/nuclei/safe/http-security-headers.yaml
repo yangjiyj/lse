@@ -1,0 +1,30 @@
+id: lse-http-security-headers
+
+info:
+  name: LSE HTTP Security Header Verification
+  author: lse
+  severity: low
+  description: Checks whether a successful HTTP response lacks the nosniff protection header.
+  remediation: Set X-Content-Type-Options to nosniff and return an accurate Content-Type.
+  metadata:
+    customer-title: '响应缺少类型嗅探防护'
+    customer-summary: '目标响应未设置内容类型嗅探防护，浏览器可能错误解释响应内容。'
+    lse-evidence: config
+  tags: lse,safe,misconfig
+
+http:
+  - method: GET
+    path:
+      - '{{BaseURL}}'
+    redirects: false
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+          - 202
+          - 204
+      - type: dsl
+        dsl:
+          - "!contains(to_lower(all_headers), 'x-content-type-options:')"

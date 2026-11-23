@@ -1,0 +1,8 @@
+{
+  "name": "weather-mcp",
+  "version": "1.2.0",
+  "bin": { "weather-mcp": "dist/index.js" },
+  "scripts": { "build": "tsc", "start": "node dist/index.js" },
+  "dependencies": { "@modelcontextprotocol/sdk": "1.17.0", "zod": "*" },
+  "files": ["dist/**/*"]
+}

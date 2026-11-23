@@ -1,0 +1,14 @@
+{
+  "@programName": "ZAP",
+  "@version": "2.16.1",
+  "@generated": "Sun, 30 Aug 2026 08:40:00",
+  "site": [
+    {
+      "@name": "http://openapi-fixed:8080",
+      "@host": "openapi-fixed",
+      "@port": "8080",
+      "@ssl": "false",
+      "alerts": []
+    }
+  ]
+}

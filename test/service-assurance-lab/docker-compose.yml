@@ -1,0 +1,156 @@
+x-target: &target
+  image: node:22-bookworm-slim@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
+  pull_policy: never
+  restart: 'no'
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 64
+  mem_limit: 128m
+  cpus: 0.5
+  working_dir: /lab
+  volumes:
+    - ./:/lab:ro
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=16777216,mode=1777
+  healthcheck:
+    test:
+      [
+        CMD,
+        node,
+        -e,
+        "fetch('http://127.0.0.1:8080/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+      ]
+    interval: 2s
+    timeout: 2s
+    retries: 20
+
+x-sidecar: &sidecar
+  pull_policy: never
+  restart: 'no'
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 256
+  cpus: 1.0
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=268435456,mode=1777
+  networks:
+    lab: {}
+
+services:
+  gateway-negative:
+    <<: *target
+    command: [node, gateway-negative/server.mjs]
+    networks:
+      lab:
+        ipv4_address: 192.168.240.10
+
+  triton-affected:
+    <<: *target
+    command: [node, triton-affected/server.mjs]
+    networks:
+      lab:
+        ipv4_address: 192.168.240.11
+
+  triton-fixed:
+    <<: *target
+    command: [node, triton-fixed/server.mjs]
+    networks:
+      lab:
+        ipv4_address: 192.168.240.12
+
+  nuclei:
+    <<: *sidecar
+    image: sha256:4e74692cbcdfeb65c2f71159db70706241f12ce9cde2163600893c33bd2be336
+    mem_limit: 768m
+    environment:
+      SERVICE_ASSURANCE_BASELINE_VERSION: lse-rules-2026.08.30.3
+      SERVICE_ASSURANCE_BASELINE_DIGEST: sha256:124509fdacc43314287589194b0cb1acf67ea4f6133daf6776e00be250ea6f73
+      SERVICE_ASSURANCE_BASELINE_UPDATED_AT: '2026-08-30T13:21:26Z'
+      SERVICE_ASSURANCE_BASELINE_STATUS: ${SERVICE_ASSURANCE_E2E_RULESET_STATUS:-CURRENT}
+      SERVICE_ASSURANCE_MANIFEST_PATH: /opt/service-assurance/rules/manifest.json
+      SERVICE_ASSURANCE_MANIFEST_SIGNATURE_PATH: /trust/rules/manifest.sig
+      SERVICE_ASSURANCE_MANIFEST_PUBLIC_KEY_PATH: /trust/manifest.pub
+    volumes:
+      - ${SERVICE_ASSURANCE_E2E_SIGNATURE_DIR:?}/manifest.pub:/trust/manifest.pub:ro
+      - ${SERVICE_ASSURANCE_E2E_SIGNATURE_DIR:?}/rules/manifest.sig:/trust/rules/manifest.sig:ro
+    networks:
+      lab:
+        ipv4_address: 192.168.240.21
+
+  trivy:
+    <<: *sidecar
+    image: sha256:12589460e404c70e127eaf35641319ccca57f8c9c8db1ae9c9c450adbffd2307
+    mem_limit: 1536m
+    environment:
+      SERVICE_ASSURANCE_BASELINE_VERSION: trivy-db-2026.08.30T070529Z
+      SERVICE_ASSURANCE_BASELINE_DIGEST: sha256:542d1ae089c1070990372d1416416f2a3e699f0c5c12fbc1cafe37071c00e27d
+      SERVICE_ASSURANCE_BASELINE_UPDATED_AT: '2026-08-30T07:05:29Z'
+      SERVICE_ASSURANCE_BASELINE_STATUS: CURRENT
+      SERVICE_ASSURANCE_MANIFEST_PATH: /opt/service-assurance/vulndb-manifest/manifest.json
+      SERVICE_ASSURANCE_MANIFEST_SIGNATURE_PATH: /trust/vulndb/manifest.sig
+      SERVICE_ASSURANCE_MANIFEST_PUBLIC_KEY_PATH: /trust/manifest.pub
+    volumes:
+      - ${SERVICE_ASSURANCE_E2E_SIGNATURE_DIR:?}/manifest.pub:/trust/manifest.pub:ro
+      - ${SERVICE_ASSURANCE_E2E_SIGNATURE_DIR:?}/vulndb/manifest.sig:/trust/vulndb/manifest.sig:ro
+      - ${SERVICE_ASSURANCE_E2E_TRIVY_DB_DIR:?}:/opt/service-assurance/vulndb/db:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=268435456,mode=1777
+      - /opt/service-assurance/vulndb/fanal:rw,noexec,nosuid,nodev,size=67108864,mode=1777
+    networks:
+      lab:
+        ipv4_address: 192.168.240.22
+
+  zap:
+    <<: *sidecar
+    image: sha256:2d9b7d50daca5d3a4aedabeea44d99ebf03f8ae6a2db996a3c15c8452f35625f
+    mem_limit: 2048m
+    environment:
+      SERVICE_ASSURANCE_BASELINE_VERSION: lse-rules-2026.08.30.3
+      SERVICE_ASSURANCE_BASELINE_DIGEST: sha256:124509fdacc43314287589194b0cb1acf67ea4f6133daf6776e00be250ea6f73
+      SERVICE_ASSURANCE_BASELINE_UPDATED_AT: '2026-08-30T13:21:26Z'
+      SERVICE_ASSURANCE_BASELINE_STATUS: ${SERVICE_ASSURANCE_E2E_RULESET_STATUS:-CURRENT}
+      SERVICE_ASSURANCE_MANIFEST_PATH: /opt/service-assurance/rules/manifest.json
+      SERVICE_ASSURANCE_MANIFEST_SIGNATURE_PATH: /trust/rules/manifest.sig
+      SERVICE_ASSURANCE_MANIFEST_PUBLIC_KEY_PATH: /trust/manifest.pub
+    volumes:
+      - ${SERVICE_ASSURANCE_E2E_SIGNATURE_DIR:?}/manifest.pub:/trust/manifest.pub:ro
+      - ${SERVICE_ASSURANCE_E2E_SIGNATURE_DIR:?}/rules/manifest.sig:/trust/rules/manifest.sig:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=536870912,mode=1777
+      - /zap/wrk:rw,noexec,nosuid,nodev,size=536870912,mode=1777,uid=1000,gid=1000
+      - /home/zap/.ZAP:rw,noexec,nosuid,nodev,size=268435456,mode=1777,uid=1000,gid=1000
+    networks:
+      lab:
+        ipv4_address: 192.168.240.23
+
+  valkey:
+    image: valkey/valkey:8-alpine@sha256:a038175878d66b9d274fbf8be73c0305e93798b83917647f167e18cef3c71eec
+    pull_policy: never
+    restart: 'no'
+    user: valkey
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    command: [valkey-server, --save, '', --appendonly, 'no', --protected-mode, 'no']
+    tmpfs:
+      - /data:rw,noexec,nosuid,nodev,size=67108864,mode=1777
+    networks:
+      control:
+        ipv4_address: 192.168.241.10
+
+networks:
+  lab:
+    internal: true
+    ipam:
+      config:
+        - subnet: 192.168.240.0/24
+  control:
+    internal: true
+    ipam:
+      config:
+        - subnet: 192.168.241.0/24

@@ -1,0 +1,312 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 218 57% 97%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 223 76% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 214 40% 96%;
+    --muted-foreground: 215 14% 41%;
+    --accent: 220 100% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 4 77% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 216 38% 92%;
+    --input: 216 35% 88%;
+    --ring: 223 76% 50%;
+    --radius: 0.625rem;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: hsl(var(--background));
+    font-size: 14px;
+    color: hsl(var(--foreground));
+    font-family:
+      'PingFang SC',
+      'HarmonyOS Sans SC',
+      'Microsoft YaHei UI',
+      'Microsoft YaHei',
+      'Noto Sans CJK SC',
+      'Source Han Sans SC',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  @keyframes redteam-scan {
+    0% {
+      transform: translateX(0);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.75;
+    }
+    100% {
+      transform: translateX(440%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes redteam-flow {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 34px 0;
+    }
+  }
+
+  @keyframes redteam-hop {
+    0% {
+      transform: translate3d(0, -50%, 0) scale(0.7);
+      opacity: 0;
+    }
+    14% {
+      opacity: 1;
+    }
+    76% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(142px, -50%, 0) scale(1.08);
+      opacity: 0;
+    }
+  }
+
+  @keyframes redteam-breathe {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgb(252 165 165 / 0.42);
+      transform: scale(0.92);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgb(252 165 165 / 0);
+      transform: scale(1);
+    }
+  }
+
+  @keyframes redteam-node-glow {
+    0%,
+    100% {
+      border-color: rgb(255 255 255 / 0.18);
+    }
+    50% {
+      border-color: rgb(103 232 249 / 0.48);
+    }
+  }
+
+  @keyframes redteam-panel-hum {
+    0%,
+    100% {
+      box-shadow:
+        inset 0 0 0 1px rgb(255 255 255 / 0.03),
+        0 0 0 rgb(248 113 113 / 0);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 0 1px rgb(103 232 249 / 0.12),
+        0 0 28px rgb(248 113 113 / 0.18);
+    }
+  }
+
+  @keyframes redteam-grid-drift {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 44px 22px;
+    }
+  }
+
+  @keyframes redteam-counter-flicker {
+    0%,
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    48% {
+      opacity: 0.72;
+      transform: translateY(-1px);
+    }
+    52% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes redteam-beat {
+    0%,
+    100% {
+      opacity: 0.42;
+      transform: scaleY(0.34);
+    }
+    42% {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+
+  .redteam-live-field::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.85), transparent 82%);
+    pointer-events: none;
+  }
+
+  .redteam-live-field.is-running {
+    animation: redteam-panel-hum 1.8s ease-in-out infinite;
+  }
+
+  .redteam-live-field.is-running::before {
+    animation: redteam-grid-drift 9s linear infinite;
+  }
+
+  .redteam-scan-line {
+    animation: redteam-scan 1.65s linear infinite;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(103 232 249 / 0.18),
+      rgb(248 113 113 / 0.22),
+      transparent
+    );
+  }
+
+  .redteam-pulse-core {
+    animation: redteam-breathe 0.95s ease-in-out infinite;
+  }
+
+  .redteam-node {
+    animation: redteam-node-glow 1.9s ease-in-out infinite;
+    backdrop-filter: blur(10px);
+  }
+
+  .redteam-signal-line {
+    animation: redteam-flow 0.72s linear infinite;
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgb(103 232 249 / 0.18) 0,
+      rgb(103 232 249 / 0.92) 8px,
+      rgb(248 113 113 / 0.75) 14px,
+      transparent 22px,
+      transparent 34px
+    );
+    box-shadow: 0 0 16px rgb(103 232 249 / 0.26);
+  }
+
+  .redteam-link-dot {
+    animation: redteam-hop 0.82s linear infinite;
+  }
+
+  .redteam-live-metric {
+    border: 1px solid rgb(255 255 255 / 0.1);
+    border-radius: 0.375rem;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(15 23 42 / 0.28));
+    padding: 0.75rem;
+  }
+
+  .redteam-live-counter {
+    display: block;
+    margin-top: 0.25rem;
+    color: white;
+    font-size: 1.125rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .redteam-live-field.is-running .redteam-live-counter {
+    animation: redteam-counter-flicker 1.1s steps(2, end) infinite;
+  }
+
+  .redteam-attack-beat {
+    display: grid;
+    height: 1.25rem;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: end;
+    gap: 0.25rem;
+  }
+
+  .redteam-attack-beat span {
+    display: block;
+    height: 100%;
+    min-width: 0;
+    transform-origin: bottom;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, rgb(103 232 249 / 0.95), rgb(248 113 113 / 0.75));
+    box-shadow: 0 0 12px rgb(103 232 249 / 0.35);
+    animation: redteam-beat 0.78s ease-in-out infinite;
+  }
+
+  .redteam-live-field.is-idle .redteam-attack-beat span {
+    animation: none;
+    opacity: 0.45;
+    transform: scaleY(0.45);
+  }
+
+  .redteam-live-field.is-idle .redteam-scan-line,
+  .redteam-live-field.is-idle .redteam-pulse-core,
+  .redteam-live-field.is-idle .redteam-node,
+  .redteam-live-field.is-idle .redteam-signal-line,
+  .redteam-live-field.is-idle .redteam-link-dot {
+    animation: none;
+  }
+
+  .redteam-live-field.is-idle .redteam-scan-line {
+    opacity: 0;
+  }
+
+  .redteam-message-pane {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .redteam-scan-line,
+    .redteam-pulse-core,
+    .redteam-node,
+    .redteam-signal-line,
+    .redteam-link-dot,
+    .redteam-live-field.is-running,
+    .redteam-live-field.is-running::before,
+    .redteam-live-field.is-running .redteam-live-counter,
+    .redteam-attack-beat span {
+      animation: none;
+    }
+  }
+}

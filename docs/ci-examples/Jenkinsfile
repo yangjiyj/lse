@@ -1,0 +1,36 @@
+// Jenkins 声明式流水线示例：LSE 评估作为发布门禁。
+// 前置：把 scripts/lse-ci.mjs 与 scripts/lib/lse-ci-core.mjs 放进仓库 ci/ 目录；
+// 在 Jenkins 凭据中创建 Secret text：lse-token（令牌）、lse-url（平台地址）；
+// 构建节点需要 Node 18+（这里用 docker agent）。
+pipeline {
+  agent { docker { image 'node:20-alpine' } }
+  options { timeout(time: 90, unit: 'MINUTES') }
+  parameters {
+    string(name: 'LSE_PLAN_ID', defaultValue: '', description: 'LSE 评估计划 ID')
+  }
+  environment {
+    LSE_URL   = credentials('lse-url')
+    LSE_TOKEN = credentials('lse-token')   // Jenkins 会在日志中自动遮蔽；仍不要 echo
+    // 私有化自签证书：NODE_EXTRA_CA_CERTS = "${WORKSPACE}/ci/lse-ca.pem"
+  }
+  stages {
+    stage('LSE 评估与门禁') {
+      steps {
+        // 退出码 1 = 门禁未通过 -> 本阶段失败；2 = 评估失败/超时；3 = 用法或认证错误
+        sh 'node ci/lse-ci.mjs run --plan "$LSE_PLAN_ID" --wait --timeout 4800 --task-file lse-task.txt'
+      }
+    }
+  }
+  post {
+    always {
+      sh '''
+        if [ -s lse-task.txt ]; then
+          node ci/lse-ci.mjs export --task-file lse-task.txt --format junit --out lse-junit.xml || true
+          node ci/lse-ci.mjs export --task-file lse-task.txt --format sarif --out lse-results.sarif || true
+        fi
+      '''
+      junit allowEmptyResults: true, testResults: 'lse-junit.xml'
+      archiveArtifacts artifacts: 'lse-junit.xml,lse-results.sarif', allowEmptyArchive: true
+    }
+  }
+}

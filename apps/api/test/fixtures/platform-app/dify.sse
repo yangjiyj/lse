@@ -1,0 +1,14 @@
+data: {"event":"agent_thought","tool":"time;fetch_url","tool_input":"{\"time\":{\"timezone\":\"Asia/Shanghai\"},\"fetch_url\":{\"url\":\"https://sink.example/page\"}}","observation":"{\"time\":\"12:00\",\"fetch_url\":\"测试页\"}"}
+
+data: {"event":"node_finished","data":{"node_type":"tool","title":"天气","inputs":{"city":"北京"},"outputs":{"weather":"晴"},"status":"succeeded"}}
+
+data: {"event":"node_finished","data":{"node_type":"http-request","title":"网页","inputs":{"url":"https://sink.example"},"outputs":{"body":"ok"},"status":"succeeded"}}
+
+data: {"event":"node_finished","data":{"node_type":"knowledge-retrieval","title":"知识库","inputs":{"query":"政策"},"outputs":{"result":["政策内容"]},"status":"succeeded"}}
+
+data: {"event":"agent_message","answer":"你好"}
+
+data: {"event":"message","answer":"，欢迎"}
+
+data: {"event":"message_end","conversation_id":"dify-conv","metadata":{"usage":{"prompt_tokens":12,"completion_tokens":8}}}
+

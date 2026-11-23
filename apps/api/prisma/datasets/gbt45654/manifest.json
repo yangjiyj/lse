@@ -1,0 +1,490 @@
+{
+  "version": "2026.11.4",
+  "generatedAt": "2026-11-15",
+  "provenance": {
+    "method": "AI 辅助编写 + 三方独立标注 + 向量去重（未经人工审校）",
+    "authoringModel": "Claude Sonnet 5.5",
+    "labelers": [
+      "Claude（盲标）",
+      "Codex（GPT 系列）",
+      "DeepSeek-v4-pro（经中转）"
+    ],
+    "embeddingDedupe": "bge-m3 余弦相似度 >= 0.86 视为近似重复，后出现者丢弃（同一小项内及跨库）",
+    "date": "2026-11-15",
+    "note": "2026.11.4 在 2026.11.3 基础上补写 A.1.a/b/c/e 四项的生成内容题、应拒答题和关键词；其余题目与关键词不变。"
+  },
+  "banks": {
+    "generation": {
+      "file": "generation.jsonl.gz",
+      "sha256": "3e67eebcd4c59ffa13fe3f13d7caed4314c7dccedfaca825d4e7f172b747768c",
+      "counts": {
+        "total": 2703,
+        "byItem": {
+          "A.1.a": 109,
+          "A.1.b": 92,
+          "A.1.c": 115,
+          "A.1.d": 91,
+          "A.1.e": 112,
+          "A.1.f": 98,
+          "A.1.g": 96,
+          "A.1.h": 79,
+          "A.2.a": 95,
+          "A.2.b": 97,
+          "A.2.c": 100,
+          "A.2.d": 99,
+          "A.2.e": 92,
+          "A.2.f": 98,
+          "A.2.g": 97,
+          "A.2.h": 93,
+          "A.2.i": 88,
+          "A.3.a": 80,
+          "A.3.b": 58,
+          "A.3.c": 74,
+          "A.3.d": 74,
+          "A.3.e": 72,
+          "A.4.a": 75,
+          "A.4.b": 76,
+          "A.4.c": 78,
+          "A.4.d": 80,
+          "A.4.e": 78,
+          "A.4.f": 78,
+          "A.4.g": 53,
+          "A.5.a": 86,
+          "A.5.b": 90
+        }
+      },
+      "review": {
+        "labeled": 2494,
+        "unanimous": 1887,
+        "majority": 477,
+        "dropped": 219,
+        "unanimousRate": 0.757,
+        "pairwise": {
+          "claude-codex": 82,
+          "claude-deepseek": 82.3,
+          "codex-deepseek": 85.3
+        },
+        "pairwiseItem": {
+          "claude-codex": 82,
+          "claude-deepseek": 82.3,
+          "codex-deepseek": 85.3
+        },
+        "intentAgreement": {
+          "claude": 86.6,
+          "codex": 86.1,
+          "deepseek": 84
+        },
+        "dropReasons": {
+          "三方都不一致": 41,
+          "二比一，人工研判后不入库（见下表）": 59,
+          "二比一，多数与出题意图都不符": 30,
+          "三方一致但与出题意图不符": 89
+        },
+        "a1Addition": {
+          "note": "A.1.a/b/c/e 于 2026-11-15 补写，规则同上：三方独立标注（Claude 盲标、Codex、DeepSeek-v4-pro），三方一致或二比一且多数与出题意图一致的入库",
+          "labeled": 506,
+          "unanimous": 434,
+          "accepted": 428,
+          "dropped": 78,
+          "byItem": {
+            "A.1.a": 109,
+            "A.1.b": 92,
+            "A.1.c": 115,
+            "A.1.e": 112
+          }
+        }
+      }
+    },
+    "refusal": {
+      "file": "refusal.jsonl.gz",
+      "sha256": "cae1e40908f4041deb25a2ab6e8de643174f15ce35d22db9e433c23942e57ae7",
+      "counts": {
+        "total": 739,
+        "byItem": {
+          "A.1.a": 37,
+          "A.1.b": 43,
+          "A.1.c": 33,
+          "A.1.d": 45,
+          "A.1.e": 37,
+          "A.1.f": 43,
+          "A.1.g": 43,
+          "A.1.h": 42,
+          "A.2.a": 43,
+          "A.2.b": 46,
+          "A.2.c": 49,
+          "A.2.d": 46,
+          "A.2.e": 49,
+          "A.2.f": 47,
+          "A.2.g": 49,
+          "A.2.h": 47,
+          "A.2.i": 40
+        }
+      },
+      "review": {
+        "labeled": 618,
+        "unanimous": 500,
+        "majority": 96,
+        "dropped": 29,
+        "unanimousRate": 0.809,
+        "pairwise": {
+          "claude-codex": 84.6,
+          "claude-deepseek": 86.7,
+          "codex-deepseek": 89.6
+        },
+        "pairwiseItem": {
+          "claude-codex": 86.2,
+          "claude-deepseek": 86.7,
+          "codex-deepseek": 91.4
+        },
+        "intentAgreement": {
+          "claude": 90.3,
+          "codex": 90,
+          "deepseek": 92.4
+        },
+        "dropReasons": {
+          "二比一，人工研判后不入库（见下表）": 13,
+          "三方都不一致": 5,
+          "二比一，多数与出题意图都不符": 4,
+          "三方一致但与出题意图不符": 7
+        },
+        "a1Addition": {
+          "note": "A.1.a/b/c/e 于 2026-11-15 补写，规则同上：三方独立标注（Claude 盲标、Codex、DeepSeek-v4-pro），三方一致或二比一且多数与出题意图一致的入库",
+          "labeled": 183,
+          "unanimous": 119,
+          "accepted": 150,
+          "dropped": 33,
+          "byItem": {
+            "A.1.a": 37,
+            "A.1.b": 43,
+            "A.1.c": 33,
+            "A.1.e": 37
+          }
+        }
+      }
+    },
+    "non_refusal": {
+      "file": "non-refusal.jsonl.gz",
+      "sha256": "30b7a75f38276d83c06a5a732458f2a48c915a98de39611f2cb5c0dc823c00a8",
+      "counts": {
+        "total": 707,
+        "byAspect": {
+          "习俗": 55,
+          "信仰": 54,
+          "健康": 53,
+          "制度": 57,
+          "历史": 54,
+          "地理": 55,
+          "年龄": 52,
+          "形象": 54,
+          "性别": 54,
+          "文化": 54,
+          "民族": 55,
+          "职业": 54,
+          "英烈": 56
+        }
+      },
+      "review": {
+        "labeled": 709,
+        "unanimous": 656,
+        "majority": 51,
+        "dropped": 2,
+        "unanimousRate": 0.925,
+        "pairwise": {
+          "claude-codex": 92.8,
+          "claude-deepseek": 93.1,
+          "codex-deepseek": 99.2
+        },
+        "pairwiseItem": {
+          "claude-codex": 92.8,
+          "claude-deepseek": 93.1,
+          "codex-deepseek": 99.2
+        },
+        "intentAgreement": {
+          "claude": 93.5,
+          "codex": 99,
+          "deepseek": 99.6
+        },
+        "dropReasons": {
+          "二比一，人工研判后不入库（见下表）": 2
+        }
+      }
+    }
+  },
+  "keywords": {
+    "file": "keywords.jsonl.gz",
+    "sha256": "8447278e72f69e0dd756677322849d837b3efe5cfb1f9cedfc577647592c8da1",
+    "total": 19581,
+    "byItem": {
+      "A.1.a": 350,
+      "A.1.b": 315,
+      "A.1.c": 316,
+      "A.1.d": 1116,
+      "A.1.e": 299,
+      "A.1.f": 1079,
+      "A.1.g": 929,
+      "A.1.h": 995,
+      "A.2.a": 541,
+      "A.2.b": 603,
+      "A.2.c": 534,
+      "A.2.d": 535,
+      "A.2.e": 517,
+      "A.2.f": 828,
+      "A.2.g": 479,
+      "A.2.h": 819,
+      "A.2.i": 929,
+      "A.3.a": 476,
+      "A.3.b": 500,
+      "A.3.c": 965,
+      "A.3.d": 753,
+      "A.3.e": 923,
+      "A.4.a": 789,
+      "A.4.b": 722,
+      "A.4.c": 710,
+      "A.4.d": 680,
+      "A.4.e": 427,
+      "A.4.f": 690,
+      "A.4.g": 762
+    },
+    "reviewStatus": "pending",
+    "review": {
+      "judges": [
+        "Codex（GPT 系列）",
+        "DeepSeek-v4-pro"
+      ],
+      "rule": "两方都判「归属拟归属项、且具体不误伤正常回答」才入库",
+      "candidates": 23620,
+      "codexApprove": 19705,
+      "deepseekApprove": 18922,
+      "both": 18922,
+      "agreeRate": 80.2,
+      "prefilter": {
+        "input": 24677,
+        "badItem": 1,
+        "tooShort": 0,
+        "tooLong": 0,
+        "generic": 7,
+        "dupExact": 1,
+        "dupCrossItem": 973,
+        "nonRefusalHit": 5,
+        "neutralHit": 70,
+        "kept": 23620
+      },
+      "lengthDistribution": {
+        "2": 500,
+        "3": 1342,
+        "4": 7951,
+        "5": 3468,
+        "6": 4024,
+        "7": 846,
+        "8": 170,
+        "share2to6": 94.4,
+        "share7to8": 5.6,
+        "max": 8
+      },
+      "upperBound": {
+        "candidates": 23620,
+        "recallMin": 1,
+        "recallMax": 33.3,
+        "perItem": {
+          "A.1.d": 23.1,
+          "A.1.f": 26.5,
+          "A.1.g": 8.3,
+          "A.1.h": 10.1,
+          "A.2.a": 5.3,
+          "A.2.b": 1,
+          "A.2.c": 1,
+          "A.2.d": 2,
+          "A.2.e": 23.9,
+          "A.2.f": 11.2,
+          "A.2.g": 4.1,
+          "A.2.h": 12.9,
+          "A.2.i": 3.4,
+          "A.3.a": 20,
+          "A.3.b": 13.8,
+          "A.3.c": 9.5,
+          "A.3.d": 29.7,
+          "A.3.e": 33.3,
+          "A.4.a": 20,
+          "A.4.b": 3.9,
+          "A.4.c": 14.1,
+          "A.4.d": 12.5,
+          "A.4.e": 15.4,
+          "A.4.f": 7.7,
+          "A.4.g": 5.7
+        }
+      },
+      "recallProxy": {
+        "A.1.d": {
+          "questions": 91,
+          "hit": 11,
+          "rate": 12.1,
+          "target": 40
+        },
+        "A.1.f": {
+          "questions": 98,
+          "hit": 19,
+          "rate": 19.4,
+          "target": 40
+        },
+        "A.1.g": {
+          "questions": 96,
+          "hit": 6,
+          "rate": 6.3,
+          "target": 40
+        },
+        "A.1.h": {
+          "questions": 79,
+          "hit": 8,
+          "rate": 10.1,
+          "target": 40
+        },
+        "A.2.a": {
+          "questions": 95,
+          "hit": 5,
+          "rate": 5.3,
+          "target": 40
+        },
+        "A.2.b": {
+          "questions": 97,
+          "hit": 1,
+          "rate": 1,
+          "target": 40
+        },
+        "A.2.c": {
+          "questions": 100,
+          "hit": 0,
+          "rate": 0,
+          "target": 40
+        },
+        "A.2.d": {
+          "questions": 99,
+          "hit": 1,
+          "rate": 1,
+          "target": 40
+        },
+        "A.2.e": {
+          "questions": 92,
+          "hit": 8,
+          "rate": 8.7,
+          "target": 40
+        },
+        "A.2.f": {
+          "questions": 98,
+          "hit": 4,
+          "rate": 4.1,
+          "target": 40
+        },
+        "A.2.g": {
+          "questions": 97,
+          "hit": 4,
+          "rate": 4.1,
+          "target": 40
+        },
+        "A.2.h": {
+          "questions": 93,
+          "hit": 3,
+          "rate": 3.2,
+          "target": 40
+        },
+        "A.2.i": {
+          "questions": 88,
+          "hit": 2,
+          "rate": 2.3,
+          "target": 40
+        },
+        "A.3.a": {
+          "questions": 80,
+          "hit": 12,
+          "rate": 15,
+          "target": 30
+        },
+        "A.3.b": {
+          "questions": 58,
+          "hit": 8,
+          "rate": 13.8,
+          "target": 30
+        },
+        "A.3.c": {
+          "questions": 74,
+          "hit": 7,
+          "rate": 9.5,
+          "target": 30
+        },
+        "A.3.d": {
+          "questions": 74,
+          "hit": 8,
+          "rate": 10.8,
+          "target": 30
+        },
+        "A.3.e": {
+          "questions": 72,
+          "hit": 17,
+          "rate": 23.6,
+          "target": 30
+        },
+        "A.4.a": {
+          "questions": 75,
+          "hit": 5,
+          "rate": 6.7,
+          "target": 30
+        },
+        "A.4.b": {
+          "questions": 76,
+          "hit": 2,
+          "rate": 2.6,
+          "target": 30
+        },
+        "A.4.c": {
+          "questions": 78,
+          "hit": 6,
+          "rate": 7.7,
+          "target": 30
+        },
+        "A.4.d": {
+          "questions": 80,
+          "hit": 7,
+          "rate": 8.8,
+          "target": 30
+        },
+        "A.4.e": {
+          "questions": 78,
+          "hit": 7,
+          "rate": 9,
+          "target": 30
+        },
+        "A.4.f": {
+          "questions": 78,
+          "hit": 2,
+          "rate": 2.6,
+          "target": 30
+        },
+        "A.4.g": {
+          "questions": 53,
+          "hit": 1,
+          "rate": 1.9,
+          "target": 30
+        }
+      },
+      "falsePositive": {
+        "nonRefusalQuestions": 707,
+        "nonRefusalHit": 0,
+        "nonRefusalRate": 0,
+        "termsHittingNonRefusal": 0,
+        "neutralSegments": 36549,
+        "termsHittingNeutral": 0
+      },
+      "a1Addition": {
+        "note": "A.1.a/b/c/e 关键词于 2026-11-15 补写，预筛（去占位词、真实名称、泛词、与现有词表重复、长词含短词、非拒答题误命中）后由 Codex 与 DeepSeek-v4-pro 各判一次，两方都认可才入库",
+        "candidates": 1526,
+        "codexApprove": 1318,
+        "both": 1280,
+        "byItem": {
+          "A.1.a": 350,
+          "A.1.b": 315,
+          "A.1.c": 316,
+          "A.1.e": 299
+        }
+      }
+    }
+  }
+}

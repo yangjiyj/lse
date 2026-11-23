@@ -1,0 +1,8 @@
+{
+  "name": "calc-mcp",
+  "version": "0.3.0",
+  "dependencies": { "zod": "*", "lodash": "^4.17.21" },
+  "workspaces": ["packages/*"],
+  "files": ["dist/**/*", "README.md"],
+  "scripts": { "exec": "node dist/index.js", "shell": "bash" }
+}

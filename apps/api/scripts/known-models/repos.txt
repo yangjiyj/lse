@@ -1,0 +1,264 @@
+# 已知开源模型库清单，由 scripts/update-known-models.ts 读取。每行：
+#   仓库  系列  类型  发布方  [选项]
+# - 类型：base（基座）| instruct（指令/对话版）| quantized（量化）| lora（适配器）| merged（合并）。
+# - 发布方：官方 = 模型厂商自己的组织（Qwen、deepseek-ai、zai-org、meta-llama、mistralai、internlm、
+#   baichuan-inc、01-ai、google、microsoft）；社区 = 第三方的转存、量化、微调、适配器和合并模型。
+#   扫描时只有官方仓库的文件能单凭文件名认定来源；页面和问题说明里只有官方仓库写「官方」。
+# - 选项 mirror=<官方仓库>：社区转存的官方模型。生成时逐个文件与官方比对，哈希一致的记 identicalToOfficial=true，
+#   扫描命中时显示官方仓库并注明「哈希经 <转存仓库> 核对」；不一致（重新保存、重新分片）的记 false，显示「<发布者> 重新保存版」。
+# - 选项 ms=<ModelScope 仓库>：受限官方仓库（gated，不登录时 Hugging Face 把 lfs.oid 打成星号）从 ModelScope
+#   文件接口取 Sha256；只收路径和大小都与 Hugging Face 官方文件树一致的文件，页面注明「哈希经 ModelScope <仓库> 核对」。
+# - 同一文件出现在多个仓库时，优先取同目录其他文件命中的仓库，其次按这里的顺序，所以官方仓库放前面。
+
+# —— Qwen（通义千问）
+Qwen/Qwen2.5-0.5B                                   Qwen      base      官方
+Qwen/Qwen2.5-0.5B-Instruct                          Qwen      instruct  官方
+Qwen/Qwen2.5-1.5B                                   Qwen      base      官方
+Qwen/Qwen2.5-1.5B-Instruct                          Qwen      instruct  官方
+Qwen/Qwen2.5-3B                                     Qwen      base      官方
+Qwen/Qwen2.5-3B-Instruct                            Qwen      instruct  官方
+Qwen/Qwen2.5-7B                                     Qwen      base      官方
+Qwen/Qwen2.5-7B-Instruct                            Qwen      instruct  官方
+Qwen/Qwen2.5-14B                                    Qwen      base      官方
+Qwen/Qwen2.5-14B-Instruct                           Qwen      instruct  官方
+Qwen/Qwen2.5-32B-Instruct                           Qwen      instruct  官方
+Qwen/Qwen2.5-72B-Instruct                           Qwen      instruct  官方
+Qwen/Qwen2.5-Coder-7B-Instruct                      Qwen      instruct  官方
+Qwen/Qwen2.5-Coder-32B-Instruct                     Qwen      instruct  官方
+Qwen/Qwen2.5-Math-7B-Instruct                       Qwen      instruct  官方
+Qwen/Qwen2.5-VL-7B-Instruct                         Qwen      instruct  官方
+Qwen/Qwen2-7B-Instruct                              Qwen      instruct  官方
+Qwen/Qwen1.5-7B-Chat                                Qwen      instruct  官方
+Qwen/QwQ-32B                                        Qwen      instruct  官方
+Qwen/Qwen3-0.6B-Base                                Qwen      base      官方
+Qwen/Qwen3-0.6B                                     Qwen      instruct  官方
+Qwen/Qwen3-1.7B                                     Qwen      instruct  官方
+Qwen/Qwen3-4B                                       Qwen      instruct  官方
+Qwen/Qwen3-8B-Base                                  Qwen      base      官方
+Qwen/Qwen3-8B                                       Qwen      instruct  官方
+Qwen/Qwen3-14B                                      Qwen      instruct  官方
+Qwen/Qwen3-32B                                      Qwen      instruct  官方
+Qwen/Qwen3-30B-A3B                                  Qwen      instruct  官方
+Qwen/Qwen3-235B-A22B                                Qwen      instruct  官方
+Qwen/Qwen2.5-0.5B-Instruct-GGUF                     Qwen      quantized 官方
+Qwen/Qwen2.5-7B-Instruct-GGUF                       Qwen      quantized 官方
+Qwen/Qwen2.5-14B-Instruct-GGUF                      Qwen      quantized 官方
+Qwen/Qwen2.5-Coder-7B-Instruct-GGUF                 Qwen      quantized 官方
+Qwen/Qwen2.5-7B-Instruct-AWQ                        Qwen      quantized 官方
+Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4                  Qwen      quantized 官方
+Qwen/Qwen2.5-7B-Instruct-GPTQ-Int8                  Qwen      quantized 官方
+Qwen/Qwen2.5-32B-Instruct-AWQ                       Qwen      quantized 官方
+Qwen/Qwen2.5-72B-Instruct-AWQ                       Qwen      quantized 官方
+Qwen/QwQ-32B-AWQ                                    Qwen      quantized 官方
+Qwen/Qwen3-4B-GGUF                                  Qwen      quantized 官方
+Qwen/Qwen3-8B-GGUF                                  Qwen      quantized 官方
+Qwen/Qwen3-8B-AWQ                                   Qwen      quantized 官方
+Qwen/Qwen3-8B-FP8                                   Qwen      quantized 官方
+Qwen/Qwen3-32B-AWQ                                  Qwen      quantized 官方
+bartowski/Qwen2.5-7B-Instruct-GGUF                  Qwen      quantized 社区
+unsloth/Qwen2.5-7B-Instruct-bnb-4bit                Qwen      quantized 社区
+unsloth/Qwen3-8B-GGUF                               Qwen      quantized 社区
+
+# —— DeepSeek（深度求索）
+deepseek-ai/deepseek-llm-7b-base                    DeepSeek  base      官方
+deepseek-ai/deepseek-llm-7b-chat                    DeepSeek  instruct  官方
+deepseek-ai/deepseek-coder-6.7b-instruct            DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-V2-Lite-Chat                   DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct         DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-V3                             DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-V3-0324                        DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1                             DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-0528                        DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B           DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-Distill-Qwen-7B             DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-Distill-Qwen-14B            DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-Distill-Qwen-32B            DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-Distill-Llama-8B            DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-Distill-Llama-70B           DeepSeek  instruct  官方
+deepseek-ai/DeepSeek-R1-0528-Qwen3-8B               DeepSeek  instruct  官方
+unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF            DeepSeek  quantized 社区
+unsloth/DeepSeek-R1-Distill-Qwen-14B-GGUF           DeepSeek  quantized 社区
+bartowski/DeepSeek-R1-Distill-Qwen-32B-GGUF         DeepSeek  quantized 社区
+unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF           DeepSeek  quantized 社区
+unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF              DeepSeek  quantized 社区
+
+# —— GLM（智谱）
+# THUDM 组织已更名为 zai-org，旧地址会跳转
+zai-org/chatglm2-6b                                 GLM       instruct  官方
+zai-org/chatglm3-6b                                 GLM       instruct  官方
+zai-org/glm-4-9b                                    GLM       base      官方
+zai-org/glm-4-9b-chat                               GLM       instruct  官方
+zai-org/glm-4-9b-chat-hf                            GLM       instruct  官方
+zai-org/GLM-4-9B-0414                               GLM       instruct  官方
+zai-org/GLM-Z1-9B-0414                              GLM       instruct  官方
+zai-org/GLM-4-32B-0414                              GLM       instruct  官方
+zai-org/GLM-4.5-Air                                 GLM       instruct  官方
+bartowski/THUDM_GLM-4-9B-0414-GGUF                  GLM       quantized 社区
+
+# —— Llama（Meta）
+# meta-llama 官方仓库是受限仓库，哈希从 ModelScope 取（Llama-2 用的 shakechen、modelscope 两个转存，
+# 都核对过与 Hugging Face 官方文件树路径、大小一致）。下面的 NousResearch、unsloth 是社区转存，2026-11-21 比对：
+# safetensors 与官方一致；NousResearch/Llama-2-7b-hf、Llama-2-7b-chat-hf 另带重新分片的 pytorch_model-*-of-00003.bin，与官方不一致。
+meta-llama/Llama-2-7b-hf                            Llama     base      官方  ms=shakechen/Llama-2-7b-hf
+meta-llama/Llama-2-7b-chat-hf                       Llama     instruct  官方  ms=shakechen/Llama-2-7b-chat-hf
+meta-llama/Llama-2-13b-chat-hf                      Llama     instruct  官方  ms=modelscope/Llama-2-13b-chat-ms
+meta-llama/Meta-Llama-3-8B                          Llama     base      官方  ms=LLM-Research/Meta-Llama-3-8B
+meta-llama/Meta-Llama-3-8B-Instruct                 Llama     instruct  官方  ms=LLM-Research/Meta-Llama-3-8B-Instruct
+meta-llama/Meta-Llama-3-70B-Instruct                Llama     instruct  官方  ms=LLM-Research/Meta-Llama-3-70B-Instruct
+meta-llama/Llama-3.1-8B                             Llama     base      官方  ms=LLM-Research/Meta-Llama-3.1-8B
+meta-llama/Llama-3.1-8B-Instruct                    Llama     instruct  官方  ms=LLM-Research/Meta-Llama-3.1-8B-Instruct
+meta-llama/Llama-3.2-1B                             Llama     base      官方  ms=LLM-Research/Llama-3.2-1B
+meta-llama/Llama-3.2-1B-Instruct                    Llama     instruct  官方  ms=LLM-Research/Llama-3.2-1B-Instruct
+meta-llama/Llama-3.2-3B                             Llama     base      官方  ms=LLM-Research/Llama-3.2-3B
+meta-llama/Llama-3.2-3B-Instruct                    Llama     instruct  官方  ms=LLM-Research/Llama-3.2-3B-Instruct
+meta-llama/Llama-3.2-11B-Vision-Instruct            Llama     instruct  官方  ms=LLM-Research/Llama-3.2-11B-Vision-Instruct
+meta-llama/Llama-3.3-70B-Instruct                   Llama     instruct  官方  ms=LLM-Research/Llama-3.3-70B-Instruct
+NousResearch/Llama-2-7b-hf                          Llama     base      社区  mirror=meta-llama/Llama-2-7b-hf
+NousResearch/Llama-2-7b-chat-hf                     Llama     instruct  社区  mirror=meta-llama/Llama-2-7b-chat-hf
+NousResearch/Llama-2-13b-chat-hf                    Llama     instruct  社区  mirror=meta-llama/Llama-2-13b-chat-hf
+NousResearch/Meta-Llama-3-8B                        Llama     base      社区  mirror=meta-llama/Meta-Llama-3-8B
+NousResearch/Meta-Llama-3-8B-Instruct               Llama     instruct  社区  mirror=meta-llama/Meta-Llama-3-8B-Instruct
+NousResearch/Meta-Llama-3-70B-Instruct              Llama     instruct  社区  mirror=meta-llama/Meta-Llama-3-70B-Instruct
+NousResearch/Meta-Llama-3.1-8B                      Llama     base      社区  mirror=meta-llama/Llama-3.1-8B
+NousResearch/Meta-Llama-3.1-8B-Instruct             Llama     instruct  社区  mirror=meta-llama/Llama-3.1-8B-Instruct
+unsloth/Meta-Llama-3.1-8B-Instruct                  Llama     instruct  社区  mirror=meta-llama/Llama-3.1-8B-Instruct
+unsloth/Llama-3.2-1B                                Llama     base      社区  mirror=meta-llama/Llama-3.2-1B
+unsloth/Llama-3.2-1B-Instruct                       Llama     instruct  社区  mirror=meta-llama/Llama-3.2-1B-Instruct
+unsloth/Llama-3.2-3B                                Llama     base      社区  mirror=meta-llama/Llama-3.2-3B
+unsloth/Llama-3.2-3B-Instruct                       Llama     instruct  社区  mirror=meta-llama/Llama-3.2-3B-Instruct
+unsloth/Llama-3.2-11B-Vision-Instruct               Llama     instruct  社区  mirror=meta-llama/Llama-3.2-11B-Vision-Instruct
+unsloth/Llama-3.3-70B-Instruct                      Llama     instruct  社区  mirror=meta-llama/Llama-3.3-70B-Instruct
+hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4  Llama     quantized 社区
+hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4 Llama     quantized 社区
+RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8             Llama     quantized 社区
+bartowski/Meta-Llama-3.1-8B-Instruct-GGUF           Llama     quantized 社区
+bartowski/Llama-3.2-1B-Instruct-GGUF                Llama     quantized 社区
+bartowski/Llama-3.2-3B-Instruct-GGUF                Llama     quantized 社区
+unsloth/Llama-3.2-3B-Instruct-GGUF                  Llama     quantized 社区
+lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF  Llama     quantized 社区
+TheBloke/Llama-2-7B-Chat-GGUF                       Llama     quantized 社区
+TheBloke/Llama-2-7B-Chat-GPTQ                       Llama     quantized 社区
+TheBloke/Llama-2-7B-Chat-AWQ                        Llama     quantized 社区
+unsloth/llama-3-8b-Instruct-bnb-4bit                Llama     quantized 社区
+unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit         Llama     quantized 社区
+
+# —— Mistral
+mistralai/Mistral-7B-v0.1                           Mistral   base      官方
+mistralai/Mistral-7B-Instruct-v0.1                  Mistral   instruct  官方
+mistralai/Mistral-7B-Instruct-v0.2                  Mistral   instruct  官方
+mistralai/Mistral-7B-Instruct-v0.3                  Mistral   instruct  官方
+mistralai/Mixtral-8x7B-Instruct-v0.1                Mistral   instruct  官方
+mistralai/Mistral-Nemo-Instruct-2407                Mistral   instruct  官方
+mistralai/Ministral-8B-Instruct-2410                Mistral   instruct  官方
+mistralai/Mistral-Small-24B-Instruct-2501           Mistral   instruct  官方
+TheBloke/Mistral-7B-Instruct-v0.2-GGUF              Mistral   quantized 社区
+TheBloke/Mistral-7B-Instruct-v0.2-AWQ               Mistral   quantized 社区
+TheBloke/Mistral-7B-Instruct-v0.2-GPTQ              Mistral   quantized 社区
+TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF            Mistral   quantized 社区
+MaziyarPanahi/Mistral-7B-Instruct-v0.3-GGUF         Mistral   quantized 社区
+bartowski/Mistral-Nemo-Instruct-2407-GGUF           Mistral   quantized 社区
+
+# —— InternLM（书生·浦语）
+internlm/internlm2-chat-7b                          InternLM  instruct  官方
+internlm/internlm2_5-7b                             InternLM  base      官方
+internlm/internlm2_5-7b-chat                        InternLM  instruct  官方
+internlm/internlm2_5-1_8b-chat                      InternLM  instruct  官方
+internlm/internlm2_5-20b-chat                       InternLM  instruct  官方
+internlm/internlm3-8b-instruct                      InternLM  instruct  官方
+internlm/internlm2_5-7b-chat-gguf                   InternLM  quantized 官方
+internlm/internlm3-8b-instruct-gguf                 InternLM  quantized 官方
+internlm/internlm2_5-7b-chat-4bit                   InternLM  quantized 官方
+
+# —— Baichuan（百川）
+baichuan-inc/Baichuan-7B                            Baichuan  base      官方
+baichuan-inc/Baichuan-13B-Chat                      Baichuan  instruct  官方
+baichuan-inc/Baichuan2-7B-Base                      Baichuan  base      官方
+baichuan-inc/Baichuan2-7B-Chat                      Baichuan  instruct  官方
+baichuan-inc/Baichuan2-13B-Base                     Baichuan  base      官方
+baichuan-inc/Baichuan2-13B-Chat                     Baichuan  instruct  官方
+baichuan-inc/Baichuan2-7B-Chat-4bits                Baichuan  quantized 官方
+baichuan-inc/Baichuan2-13B-Chat-4bits               Baichuan  quantized 官方
+baichuan-inc/Baichuan-M1-14B-Instruct               Baichuan  instruct  官方
+
+# —— Yi（零一万物）
+01-ai/Yi-6B                                         Yi        base      官方
+01-ai/Yi-6B-Chat                                    Yi        instruct  官方
+01-ai/Yi-34B-Chat                                   Yi        instruct  官方
+01-ai/Yi-1.5-9B                                     Yi        base      官方
+01-ai/Yi-1.5-6B-Chat                                Yi        instruct  官方
+01-ai/Yi-1.5-9B-Chat                                Yi        instruct  官方
+01-ai/Yi-1.5-34B-Chat                               Yi        instruct  官方
+01-ai/Yi-Coder-9B-Chat                              Yi        instruct  官方
+01-ai/Yi-6B-Chat-4bits                              Yi        quantized 官方
+01-ai/Yi-34B-Chat-4bits                             Yi        quantized 官方
+bartowski/Yi-1.5-9B-Chat-GGUF                       Yi        quantized 社区
+
+# —— Gemma（Google）
+# google/gemma 官方仓库同样受限，哈希从 ModelScope（AI-ModelScope、LLM-Research 的转存）取。
+# unsloth 的 gemma-2b、gemma-2b-it、gemma-7b-it、gemma-2-2b、gemma-2-2b-it 是重新保存版，与官方文件不一致；其余 unsloth 转存与官方一致。
+google/gemma-2b                                     Gemma     base      官方  ms=AI-ModelScope/gemma-2b
+google/gemma-2b-it                                  Gemma     instruct  官方  ms=AI-ModelScope/gemma-2b-it
+google/gemma-7b-it                                  Gemma     instruct  官方  ms=AI-ModelScope/gemma-7b-it
+google/gemma-2-2b                                   Gemma     base      官方  ms=LLM-Research/gemma-2-2b
+google/gemma-2-2b-it                                Gemma     instruct  官方  ms=LLM-Research/gemma-2-2b-it
+google/gemma-2-9b-it                                Gemma     instruct  官方  ms=LLM-Research/gemma-2-9b-it
+google/gemma-2-27b-it                               Gemma     instruct  官方  ms=LLM-Research/gemma-2-27b-it
+google/gemma-3-1b-pt                                Gemma     base      官方  ms=LLM-Research/gemma-3-1b-pt
+google/gemma-3-1b-it                                Gemma     instruct  官方  ms=LLM-Research/gemma-3-1b-it
+google/gemma-3-4b-it                                Gemma     instruct  官方  ms=LLM-Research/gemma-3-4b-it
+google/gemma-3-12b-it                               Gemma     instruct  官方  ms=LLM-Research/gemma-3-12b-it
+google/gemma-3-27b-it                               Gemma     instruct  官方  ms=LLM-Research/gemma-3-27b-it
+unsloth/gemma-2b                                    Gemma     base      社区  mirror=google/gemma-2b
+unsloth/gemma-2b-it                                 Gemma     instruct  社区  mirror=google/gemma-2b-it
+unsloth/gemma-7b-it                                 Gemma     instruct  社区  mirror=google/gemma-7b-it
+unsloth/gemma-2-2b                                  Gemma     base      社区  mirror=google/gemma-2-2b
+unsloth/gemma-2-2b-it                               Gemma     instruct  社区  mirror=google/gemma-2-2b-it
+unsloth/gemma-2-9b-it                               Gemma     instruct  社区  mirror=google/gemma-2-9b-it
+unsloth/gemma-2-27b-it                              Gemma     instruct  社区  mirror=google/gemma-2-27b-it
+unsloth/gemma-3-1b-pt                               Gemma     base      社区  mirror=google/gemma-3-1b-pt
+unsloth/gemma-3-1b-it                               Gemma     instruct  社区  mirror=google/gemma-3-1b-it
+unsloth/gemma-3-4b-it                               Gemma     instruct  社区  mirror=google/gemma-3-4b-it
+unsloth/gemma-3-12b-it                              Gemma     instruct  社区  mirror=google/gemma-3-12b-it
+unsloth/gemma-3-27b-it                              Gemma     instruct  社区  mirror=google/gemma-3-27b-it
+bartowski/gemma-2-2b-it-GGUF                        Gemma     quantized 社区
+bartowski/google_gemma-3-4b-it-GGUF                 Gemma     quantized 社区
+unsloth/gemma-3-1b-it-GGUF                          Gemma     quantized 社区
+bartowski/gemma-2-9b-it-GGUF                        Gemma     quantized 社区
+unsloth/gemma-3-4b-it-GGUF                          Gemma     quantized 社区
+lmstudio-community/gemma-3-12b-it-GGUF              Gemma     quantized 社区
+
+# —— Phi（Microsoft）
+microsoft/phi-2                                     Phi       base      官方
+microsoft/Phi-3-mini-4k-instruct                    Phi       instruct  官方
+microsoft/Phi-3-mini-128k-instruct                  Phi       instruct  官方
+microsoft/Phi-3-medium-4k-instruct                  Phi       instruct  官方
+microsoft/Phi-3.5-mini-instruct                     Phi       instruct  官方
+microsoft/Phi-3.5-MoE-instruct                      Phi       instruct  官方
+microsoft/phi-4                                     Phi       instruct  官方
+microsoft/Phi-4-mini-instruct                       Phi       instruct  官方
+microsoft/Phi-4-reasoning                           Phi       instruct  官方
+microsoft/Phi-3-mini-4k-instruct-gguf               Phi       quantized 官方
+microsoft/phi-4-gguf                                Phi       quantized 官方
+bartowski/Phi-3.5-mini-instruct-GGUF                Phi       quantized 社区
+unsloth/phi-4-GGUF                                  Phi       quantized 社区
+
+# —— 常见社区微调
+HuggingFaceH4/zephyr-7b-beta                        Mistral   instruct  社区
+teknium/OpenHermes-2.5-Mistral-7B                   Mistral   instruct  社区
+NousResearch/Hermes-3-Llama-3.1-8B                  Llama     instruct  社区
+lmsys/vicuna-7b-v1.5                                Llama     instruct  社区
+openchat/openchat-3.5-0106                          Mistral   instruct  社区
+
+# —— LoRA / PEFT 适配器
+tloen/alpaca-lora-7b                                Llama     lora      社区
+timdettmers/guanaco-7b                              Llama     lora      社区
+timdettmers/guanaco-33b                             Llama     lora      社区
+chansung/gpt4-alpaca-lora-7b                        Llama     lora      社区
+ybelkada/opt-350m-lora                              OPT       lora      社区
+FinGPT/fingpt-mt_llama2-7b_lora                     Llama     lora      社区
+
+# —— 合并模型
+mlabonne/Daredevil-8B                               Llama     merged    社区
+mlabonne/Marcoro14-7B-slerp                         Mistral   merged    社区
+mlabonne/Beagle14-7B                                Mistral   merged    社区
+Undi95/Toppy-M-7B                                   Mistral   merged    社区

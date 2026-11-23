@@ -1,0 +1,60 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "triton-service-sbom",
+  "documentNamespace": "https://lse.invalid/spdx/triton-service/20260830",
+  "creationInfo": {
+    "created": "2026-08-30T00:00:00Z",
+    "creators": ["Tool: LSE fixture"]
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Triton",
+      "name": "NVIDIA Triton 推理服务",
+      "versionInfo": "2.40.0",
+      "supplier": "Organization: NVIDIA",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/nvidia/tritonserver@2.40.0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Log4j",
+      "name": "org.apache.logging.log4j:log4j-core",
+      "versionInfo": "2.14.1",
+      "supplier": "Organization: Apache Software Foundation",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:apache:log4j:2.14.1:*:*:*:*:*:*:*"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3028 @@
+// 大模型安全评估平台 —— 数据模型（一期）
+// 业务代码只消费 EngineResult 归一化契约，不直接依赖任一开源引擎私有结构。
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================= 枚举 =============================
+enum Severity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum EvalTaskStatus {
+  PENDING
+  RUNNING
+  PAUSED
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
+enum EngineRunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  ERROR
+  SKIPPED
+}
+
+enum FindingReviewStatus {
+  UNREVIEWED
+  NEEDS_REVIEW
+  CONFIRMED
+  FALSE_POSITIVE
+  ACCEPTED_RISK
+}
+
+enum FindingRemediationStatus {
+  OPEN
+  IN_PROGRESS
+  READY_FOR_RETEST
+  VERIFIED_CLOSED
+  REOPENED
+  NOT_APPLICABLE
+}
+
+enum ModelCallStatus {
+  SUCCESS
+  ERROR
+}
+
+enum Verdict {
+  PASS
+  FAIL
+  UNKNOWN
+  ERROR
+}
+
+enum QuestionType {
+  COMPLIANCE
+  PROMPT_INJECTION
+  SHOULD_REFUSE
+  GENERAL
+}
+
+enum ImportStatus {
+  PENDING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+enum LicenseStatus {
+  ACTIVE
+  EXPIRED
+  INVALID
+  REVOKED
+}
+
+enum TargetType {
+  MODEL
+  AGENT
+  AGENT_API
+  PLATFORM_APP
+  ENDPOINT_AGENT
+  PUBLIC_AGENT
+  MCP_OPENAPI
+  GATEWAY_LOG
+  JUDGE
+}
+
+enum ServiceAssuranceMode {
+  SAFE
+  DEEP
+  SBOM
+}
+
+enum ServiceAssuranceTargetKind {
+  ENDPOINT
+  OPENAPI
+  MCP
+  SBOM
+}
+
+enum ServiceAssuranceRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  PARTIAL
+  FAILED
+  CANCELED
+}
+
+enum ServiceAssuranceCoverageStatus {
+  COMPLETE
+  INCOMPLETE
+  NOT_READY
+}
+
+enum AssuranceImpactStatus {
+  UNDER_INVESTIGATION
+  AFFECTED
+  NOT_AFFECTED
+  FIXED
+}
+
+enum AssuranceEvidenceLevel {
+  LEAD
+  VERSION_MATCH
+  CONFIG_MATCH
+  ACTIVE_VERIFIED
+}
+
+enum AssuranceEvidenceVisibility {
+  CUSTOMER
+  TECHNICAL
+  AUDIT_ONLY
+}
+
+enum AssurancePriority {
+  P0
+  P1
+  P2
+  P3
+  UNKNOWN
+}
+
+// ============================= 租户 =============================
+/// 多租户：每个用户属于一个租户；isPlatform 为平台租户（原有数据与平台管理员所在）。
+/// 各业务表的 tenantId 是普通列（不建 Prisma 关系），由 db.ts 的查询扩展按当前租户自动过滤与填充，
+/// 后台任务写入时由数据库触发器从父对象继承（见迁移 20261106120000_multi_tenant）。
+model Tenant {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  isPlatform  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+
+  @@map("tenants")
+}
+
+// ============================= 用户 / 角色 / 权限 =============================
+/// 自助注册审核状态：NONE 为存量用户和管理员新建的用户
+enum RegistrationStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id                 String             @id @default(uuid())
+  /// 所属租户（平台管理员也有一个本属租户：平台租户）
+  tenantId           String             @default("00000000-0000-4000-8000-000000000001")
+  tenant             Tenant             @relation(fields: [tenantId], references: [id])
+  username           String             @unique
+  passwordHash       String
+  displayName        String
+  email              String?
+  /// 自助注册填写的手机号与单位
+  phone              String?
+  organization       String?
+  /// 所属组织（2.9.3 组织架构），与上面自助注册填的「单位」无关
+  organizationId     String?
+  org                Organization?      @relation("UserOrganization", fields: [organizationId], references: [id], onDelete: Restrict)
+  registrationStatus RegistrationStatus @default(NONE)
+  isActive           Boolean            @default(true)
+  isBuiltin          Boolean            @default(false)
+  lastLoginAt        DateTime?
+  preferences        Json?
+  // 安全设置：登录失败计数、锁定截止、改密时间（密码强制更新）、最近活跃（超时登出）
+  failedLoginCount   Int                @default(0)
+  lockedUntil        DateTime?
+  passwordChangedAt  DateTime?          @default(now())
+  /// 须改密：管理员新建、管理员重置、审核通过的注册用户为 true，自己改密后清除
+  mustChangePassword Boolean            @default(false)
+  lastActiveAt       DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  roles                        UserRole[]
+  uploadedLicenses             License[]                  @relation("LicenseUploadedBy")
+  createdTargets               ModelTarget[]              @relation("TargetCreatedBy")
+  createdSets                  QuestionSet[]              @relation("SetCreatedBy")
+  imports                      QuestionImport[]           @relation("ImportUploadedBy")
+  createdTasks                 EvalTask[]                 @relation("TaskCreatedBy")
+  generatedReports             Report[]                   @relation("ReportGeneratedBy")
+  auditLogs                    AuditLog[]                 @relation("AuditActor")
+  updatedSystemSettings        SystemSetting[]            @relation("SystemSettingUpdatedBy")
+  serviceAssuranceRuns         ServiceAssuranceRun[]      @relation("ServiceAssuranceRunCreatedBy")
+  reviewedAssuranceAssessments VulnerabilityAssessment[]  @relation("AssuranceAssessmentReviewedBy")
+  createdStandardRevisions     StandardQuestionRevision[] @relation("StandardRevisionCreatedBy")
+  reviewedStandardQuestions    StandardQuestionReview[]   @relation("StandardQuestionReviewReviewer")
+  publishedStandardReleases    StandardBankRelease[]      @relation("StandardBankReleasePublishedBy")
+  createdStandardRuns          StandardRun[]              @relation("StandardRunCreatedBy")
+  standardJudgments            StandardJudgment[]         @relation("StandardJudgmentBy")
+  generatedStandardReports     StandardReport[]           @relation("StandardReportGeneratedBy")
+  createdEvalPlans             EvalPlan[]                 @relation("EvalPlanCreatedBy")
+  modelFileScans               ModelFileScan[]            @relation("ModelFileScanCreatedBy")
+  modelFileUploads             ModelFileUpload[]          @relation("ModelFileUploadCreatedBy")
+  findingFrameworkMappings     FindingFrameworkMapping[]
+  fleetCodesCreated            FleetEnrollmentCode[]      @relation("FleetCodeCreatedBy")
+  fleetJobsRequested           FleetEvalJob[]             @relation("FleetJobRequestedBy")
+  fleetJobsApproved            FleetEvalJob[]             @relation("FleetJobApprovedBy")
+  supportTickets               SupportTicket[]            @relation("SupportTicketCreatedBy")
+  supportTicketReplies         SupportTicketReply[]       @relation("SupportTicketReplyAuthor")
+  toolsCreated                 Tool[]                     @relation("ToolCreatedBy")
+  toolVersionsCreated          ToolVersion[]              @relation("ToolVersionCreatedBy")
+  toolManualsCreated           ToolManual[]               @relation("ToolManualCreatedBy")
+  toolDownloads                ToolDownload[]             @relation("ToolDownloadUser")
+
+  @@index([tenantId])
+  @@index([organizationId])
+  @@map("users")
+}
+
+/// 登录页访问量与安装包下载量：按北京时间切日，每天一行
+model PlatformDailyStat {
+  date      DateTime @id @db.Date
+  visits    Int      @default(0)
+  downloads Int      @default(0)
+
+  @@map("platform_daily_stats")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isBuiltin   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g. "model_target:create"
+  name        String
+  group       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ============================= License =============================
+model SystemSetting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedBy   User?    @relation("SystemSettingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model License {
+  id                 String        @id @default(uuid())
+  raw                String // 上传的 license.json 原文
+  payload            Json
+  subject            String?
+  issuedAt           DateTime?
+  expiresAt          DateTime?
+  machineFingerprint String?
+  status             LicenseStatus @default(ACTIVE)
+  isActive           Boolean       @default(true)
+  uploadedById       String?
+  uploadedBy         User?         @relation("LicenseUploadedBy", fields: [uploadedById], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@map("licenses")
+}
+
+// ============================= 模型对象 =============================
+model ModelTarget {
+  id                        String     @id @default(uuid())
+  /// 所属租户（空 = 平台共享）
+  tenantId                  String?
+  name                      String
+  provider                  String // openai-compatible | deepseek | tongyi | boflow ...
+  targetType                TargetType @default(MODEL)
+  baseUrl                   String
+  apiKey                    String
+  model                     String
+  extraHeaders              Json?
+  defaultParams             Json?
+  accessConfig              Json?
+  agentConfig               Json?
+  isGlobal                  Boolean    @default(true)
+  isActive                  Boolean    @default(true)
+  lastTestedAt              DateTime?
+  lastTestStatus            String?
+  /// RAG 专项评估：被测对象声明为 RAG 应用；ragOptions 存引用来源 JSON 路径与知识库上传接口配置。
+  isRag                     Boolean    @default(false)
+  ragOptions                Json?
+  /// RAG 越权检测用的受限库上传凭据（AES-256-GCM 密文，永不回显）。
+  ragRestrictedUploadSecret String?
+  createdById               String?
+  createdBy                 User?      @relation("TargetCreatedBy", fields: [createdById], references: [id])
+  createdAt                 DateTime   @default(now())
+  updatedAt                 DateTime   @updatedAt
+  /// W6b 多模态越狱：评估对象是否声明支持图片输入（OpenAI 兼容 image_url）。
+  supportsVision            Boolean    @default(false)
+
+  evalTasks        EvalTask[]
+  evalResults      EvalResult[]
+  evaluatedReports Report[]           @relation("ReportEvaluatedTarget")
+  evalPlans        EvalPlan[]
+  modelFileScans   ModelFileScan[]
+  ragEvalRuns      RagEvalRun[]
+  fingerprints     ModelFingerprint[]
+  ledgerAssets     LedgerAsset[]
+
+  @@unique([tenantId, name])
+  @@index([targetType])
+  @@index([tenantId])
+  @@map("model_targets")
+}
+
+// ============================= 题库 =============================
+model QuestionSet {
+  id          String       @id @default(uuid())
+  /// 所属租户（空 = 平台共享）
+  tenantId    String?
+  name        String
+  description String?
+  type        QuestionType @default(GENERAL)
+  tags        String[]
+  source      String? // 来源数据集 / 上传 / 内置
+  language    String? // 题集主语言（生成集必填，导入集可空）
+  isBuiltin   Boolean      @default(false)
+  /// 自建库可禁用：禁用后不能再用来建任务，已有任务不受影响；内置库始终启用
+  enabled     Boolean      @default(true)
+  // 攻击种子泛化生成的题库：记录测试领域、绑定标准、场景与生成来源。
+  metadata    Json?
+  createdById String?
+  createdBy   User?        @relation("SetCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  questions Question[]
+  imports   QuestionImport[]
+  taskLinks EvalTaskQuestionSet[]
+  byoImages ByoImage[]
+
+  @@index([tenantId])
+  @@map("question_sets")
+}
+
+// 攻击种子泛化的测试领域（可选已有领域或新建领域）。
+model TestDomain {
+  id          String   @id @default(uuid())
+  /// 所属租户（空 = 平台内置，各租户只读）
+  tenantId    String?
+  name        String
+  description String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("test_domains")
+}
+
+model Question {
+  id               String       @id @default(uuid())
+  /// 所属租户（空 = 平台共享）
+  tenantId         String?
+  questionSetId    String
+  questionSet      QuestionSet  @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  externalId       String?
+  content          String
+  expectedBehavior String?
+  category         String?
+  type             QuestionType @default(GENERAL)
+  severity         Severity?
+  referenceAnswer  String?
+  language         String       @default("zh")
+  shouldRefuse     Boolean      @default(false)
+  tags             String[]
+  metadata         Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  results           EvalResult[]
+  findings          Finding[]
+  wrongAnswers      WrongAnswer[]
+  standardRevisions StandardQuestionRevision[] @relation("QuestionStandardRevisions")
+  evalTaskPins      EvalTaskQuestion[]
+
+  @@index([questionSetId, language])
+  @@index([tenantId])
+  @@map("questions")
+}
+
+model QuestionImport {
+  id            String       @id @default(uuid())
+  questionSetId String?
+  questionSet   QuestionSet? @relation(fields: [questionSetId], references: [id], onDelete: SetNull)
+  filename      String
+  format        String // xlsx | csv
+  templateType  String // compliance | prompt_injection | should_refuse | general
+  totalRows     Int          @default(0)
+  importedRows  Int          @default(0)
+  failedRows    Int          @default(0)
+  status        ImportStatus @default(PENDING)
+  errorReport   Json?
+  uploadedById  String?
+  uploadedBy    User?        @relation("ImportUploadedBy", fields: [uploadedById], references: [id])
+  createdAt     DateTime     @default(now())
+
+  @@map("question_imports")
+}
+
+// ============================= GB/T 45654 标准专项 =============================
+// 题目版本、发布版、运行和判定均为追加/快照语义，避免旧题库编辑污染历史证据。
+model StandardQuestionRevision {
+  id                     String    @id @default(uuid())
+  questionId             String?
+  question               Question? @relation("QuestionStandardRevisions", fields: [questionId], references: [id], onDelete: SetNull)
+  version                Int       @default(1)
+  content                String
+  expectedBehavior       String?
+  category               String?
+  primaryCategory        String?
+  secondaryCategories    String[]
+  nonRefusalTopic        String?
+  language               String    @default("zh")
+  modality               String    @default("text")
+  purpose                String?
+  source                 String?
+  standardProfileId      String
+  standardProfileVersion String
+  contentHash            String
+  createdById            String?
+  createdBy              User?     @relation("StandardRevisionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt              DateTime  @default(now())
+
+  reviews      StandardQuestionReview[]
+  releaseItems StandardBankReleaseItem[]
+
+  @@unique([questionId, version])
+  @@index([standardProfileId, language, modality])
+  @@index([contentHash])
+  @@map("standard_question_revisions")
+}
+
+model StandardQuestionReview {
+  id            String                   @id @default(uuid())
+  revisionId    String
+  revision      StandardQuestionRevision @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+  reviewerId    String
+  reviewer      User                     @relation("StandardQuestionReviewReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+  decision      String
+  reason        String?
+  correctionRef String?
+  createdAt     DateTime                 @default(now())
+
+  @@index([revisionId, createdAt])
+  @@map("standard_question_reviews")
+}
+
+model StandardBankRelease {
+  id             String    @id @default(uuid())
+  /// 所属租户（空 = 平台发布的标准题集，各租户可用）
+  tenantId       String?
+  profileId      String
+  profileVersion String
+  name           String
+  language       String    @default("zh")
+  modalities     String[]
+  status         String    @default("DRAFT")
+  counts         Json?
+  validation     Json?
+  overallHash    String?
+  publishedAt    DateTime?
+  publishedById  String?
+  publishedBy    User?     @relation("StandardBankReleasePublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  items StandardBankReleaseItem[]
+  runs  StandardRun[]
+
+  @@index([profileId, status])
+  @@index([tenantId])
+  @@map("standard_bank_releases")
+}
+
+model StandardBankReleaseItem {
+  id              String                   @id @default(uuid())
+  releaseId       String
+  release         StandardBankRelease      @relation(fields: [releaseId], references: [id], onDelete: Restrict)
+  revisionId      String
+  revision        StandardQuestionRevision @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+  bankType        String
+  primaryCategory String?
+  nonRefusalTopic String?
+  position        Int
+  createdAt       DateTime                 @default(now())
+
+  samples StandardSample[]
+
+  @@unique([releaseId, revisionId])
+  @@unique([releaseId, bankType, position])
+  @@index([releaseId, bankType])
+  @@map("standard_bank_release_items")
+}
+
+// ============================= 评估任务 =============================
+model EvalTask {
+  id                 String         @id @default(uuid())
+  /// 所属租户
+  tenantId           String?
+  name               String
+  description        String?
+  status             EvalTaskStatus @default(PENDING)
+  modelTargetId      String
+  modelTarget        ModelTarget    @relation(fields: [modelTargetId], references: [id])
+  engines            String[] // ["ai-infra-guard","deepeval","llm-guard"]
+  dimensions         String[] // 评测维度
+  concurrency        Int            @default(4)
+  totalQuestions     Int            @default(0)
+  /// 抽样评测：从所选样本库按分类分层抽取的题数（空 = 全量）；种子保证可复现。
+  sampleSize         Int?
+  sampleSeed         String?
+  processedQuestions Int            @default(0)
+  passedCount        Int            @default(0)
+  failedCount        Int            @default(0)
+  errorCount         Int            @default(0)
+  progress           Float          @default(0)
+  startedAt          DateTime?
+  finishedAt         DateTime?
+  createdById        String?
+  createdBy          User?          @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  questionSets              EvalTaskQuestionSet[]
+  logs                      EvalTaskLog[]
+  results                   EvalResult[]
+  findings                  Finding[]
+  remediationRetestFindings Finding[]             @relation("FindingRemediationRetestTask")
+  policySuggestions         PolicySuggestion[]    @relation("PolicySuggestionSourceTask")
+  policySuggestionRetests   PolicySuggestion[]    @relation("PolicySuggestionRetestTask")
+  wrongAnswers              WrongAnswer[]
+  engineRuns                EngineRun[]
+  reports                   Report[]
+  serviceAssuranceRuns      ServiceAssuranceRun[]
+  standardRun               StandardRun?          @relation("EvalTaskStandardRun")
+  ragEvalRun                RagEvalRun?           @relation("EvalTaskRagEvalRun")
+  /// 多模型同批次评测：同一次发起的多个任务共用一个批次号。
+  batchId                   String?
+  /// 评估计划触发生成的任务关联计划；手动发起的任务为空。
+  planId                    String?
+  plan                      EvalPlan?             @relation(fields: [planId], references: [id], onDelete: SetNull)
+  planRuns                  EvalPlanRun[]
+  /// 失败用例复测：父任务与复测模式（FAILED_ONLY）；普通任务为空。
+  parentTaskId              String?
+  parentTask                EvalTask?             @relation("EvalTaskRetestParent", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  retestTasks               EvalTask[]            @relation("EvalTaskRetestParent")
+  retestMode                String?
+  /// 显式题目冻结清单：非空时执行器只跑这些题（仍限定在关联样本库内），并跳过抽样。
+  pinnedQuestions           EvalTaskQuestion[]
+  /// 任务前模型指纹比对结果：{status,similarity,threshold,baselineId,fingerprintId,reason}
+  fingerprintCheck          Json?
+  /// 暂停（2.4.2）：执行器停下来的时间；不为空表示下次执行是接续
+  pausedAt                  DateTime?
+  /// 暂停时的执行器状态 { engineAccum, redTeamLaps }
+  pauseState                Json?
+  /// 已请求暂停、执行器还没停下（页面显示「暂停中」）；停下、撤销暂停、停止、重评、结束时清空
+  pauseRequestedAt          DateTime?
+
+  @@index([batchId])
+  @@index([planId, createdAt])
+  @@index([parentTaskId])
+  @@index([tenantId])
+  @@map("eval_tasks")
+}
+
+model EvalTaskQuestion {
+  taskId     String
+  questionId String
+  task       EvalTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([taskId, questionId])
+  @@index([questionId])
+  @@map("eval_task_questions")
+}
+
+// ============================= 评估计划 =============================
+/// 评估计划：发起任务参数快照 + cron 调度（BullMQ Job Scheduler）+ 启停。
+model EvalPlan {
+  id                 String        @id @default(uuid())
+  /// 所属租户
+  tenantId           String?
+  name               String
+  description        String?
+  targetId           String
+  target             ModelTarget   @relation(fields: [targetId], references: [id], onDelete: Restrict)
+  /// 发起评估任务参数快照（与 POST /api/eval-tasks 同一校验 schema，modelTargetId 以 targetId 为准）。
+  templateParams     Json
+  cron               String
+  timezone           String        @default("Asia/Shanghai")
+  enabled            Boolean       @default(true)
+  minIntervalMinutes Int           @default(60)
+  lastTriggeredAt    DateTime?
+  lastSkipReason     String?
+  createdById        String?
+  createdBy          User?         @relation("EvalPlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  tasks              EvalTask[]
+  runs               EvalPlanRun[]
+  gates              GateRule[]
+
+  @@index([targetId])
+  @@index([tenantId])
+  @@map("eval_plans")
+}
+
+/// 评估计划运行记录：每次触发（手动/调度/CI）一条，跳过也记录原因。
+model EvalPlanRun {
+  id          String    @id @default(uuid())
+  planId      String
+  plan        EvalPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        EvalTask? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  /// manual | schedule | ci
+  triggeredBy String
+  /// triggered | skipped
+  status      String
+  reason      String?
+  actorId     String?
+  createdAt   DateTime  @default(now())
+
+  @@index([planId, createdAt])
+  @@index([taskId])
+  @@map("eval_plan_runs")
+}
+
+model BatchEvaluation {
+  id                 String                  @id @default(uuid())
+  /// 所属租户
+  tenantId           String?
+  name               String
+  status             EvalTaskStatus          @default(PENDING)
+  createdById        String
+  strategy           String                  @default("ROUND_ROBIN")
+  judgeMode          String                  @default("MODEL")
+  judgeTargetId      String?
+  judgeFingerprint   String?
+  judgeSnapshot      Json?
+  sampleCount        Int
+  seed               String
+  samplePlanHash     String
+  policyVersion      String
+  concurrency        Int                     @default(4)
+  targetConcurrency  Int                     @default(2)
+  batchSize          Int                     @default(50)
+  rpm                Int                     @default(600)
+  maxAttempts        Int                     @default(3)
+  maxRequests        Int
+  requestsUsed       Int                     @default(0)
+  maxDurationMinutes Int                     @default(1440)
+  callbackUrl        String?
+  nextRunIndex       Int                     @default(0)
+  stopReason         String?
+  leaseOwner         String?
+  leaseUntil         DateTime?
+  startedAt          DateTime?
+  finishedAt         DateTime?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  samples            BatchEvaluationSample[]
+  runs               BatchEvaluationRun[]
+  reports            BatchEvaluationReport[]
+
+  @@index([createdById, createdAt])
+  @@index([status, leaseUntil])
+  @@index([tenantId])
+  @@map("batch_evaluations")
+}
+
+model BatchEvaluationSample {
+  id       String                  @id @default(uuid())
+  planId   String
+  plan     BatchEvaluation         @relation(fields: [planId], references: [id], onDelete: Cascade)
+  sequence Int
+  snapshot Json
+  results  BatchEvaluationResult[]
+
+  @@unique([planId, sequence])
+  @@map("batch_evaluation_samples")
+}
+
+model BatchEvaluationRun {
+  id                String                  @id @default(uuid())
+  planId            String
+  plan              BatchEvaluation         @relation(fields: [planId], references: [id], onDelete: Cascade)
+  targetId          String
+  targetName        String
+  targetFingerprint String
+  targetSnapshot    Json                    @default("{}")
+  position          Int
+  status            EvalTaskStatus          @default(PENDING)
+  results           BatchEvaluationResult[]
+
+  @@unique([planId, targetId])
+  @@unique([planId, position])
+  @@map("batch_evaluation_runs")
+}
+
+model BatchEvaluationResult {
+  id                 String                   @id @default(uuid())
+  runId              String
+  run                BatchEvaluationRun       @relation(fields: [runId], references: [id], onDelete: Cascade)
+  sampleId           String
+  sample             BatchEvaluationSample    @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  status             String                   @default("PENDING")
+  verdict            Verdict?
+  severity           Severity?
+  category           String
+  response           String?
+  evidence           String[]
+  errorMessage       String?
+  latencyMs          Int?
+  totalTokens        Int                      @default(0)
+  attempts           Int                      @default(0)
+  judgeAttempts      Int                      @default(0)
+  retryCount         Int                      @default(0)
+  targetAttemptLimit Int                      @default(3)
+  judgeAttemptLimit  Int                      @default(3)
+  shouldRefuse       Boolean                  @default(false)
+  refused            Boolean?
+  updatedAt          DateTime                 @updatedAt
+  attemptsLog        BatchEvaluationAttempt[]
+
+  @@unique([runId, sampleId])
+  @@index([runId, status])
+  @@index([runId, verdict, category])
+  @@map("batch_evaluation_results")
+}
+
+model BatchEvaluationAttempt {
+  id          String                @id @default(uuid())
+  resultId    String
+  result      BatchEvaluationResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  role        String
+  attemptNo   Int
+  status      String                @default("STARTED")
+  httpStatus  Int?
+  latencyMs   Int?
+  totalTokens Int                   @default(0)
+  errorCode   String?
+  response    String?
+  createdAt   DateTime              @default(now())
+
+  @@unique([resultId, role, attemptNo])
+  @@map("batch_evaluation_attempts")
+}
+
+model BatchEvaluationReport {
+  id        String          @id @default(uuid())
+  planId    String
+  plan      BatchEvaluation @relation(fields: [planId], references: [id], onDelete: Cascade)
+  content   String
+  summary   Json
+  createdAt DateTime        @default(now())
+
+  @@index([planId, createdAt])
+  @@map("batch_evaluation_reports")
+}
+
+model StandardRun {
+  id                   String              @id @default(uuid())
+  /// 所属租户
+  tenantId             String?
+  taskId               String              @unique
+  task                 EvalTask            @relation("EvalTaskStandardRun", fields: [taskId], references: [id], onDelete: Restrict)
+  bankReleaseId        String
+  bankRelease          StandardBankRelease @relation(fields: [bankReleaseId], references: [id], onDelete: Restrict)
+  previousTaskId       String?
+  profileSnapshot      Json
+  modelSnapshot        Json
+  boundary             String
+  language             String
+  modality             String
+  samplePlan           Json
+  samplePlanHash       String
+  status               String              @default("PENDING")
+  evidenceCompleteness String              @default("MISSING")
+  conclusion           String              @default("INSUFFICIENT_EVIDENCE")
+  createdById          String?
+  createdBy            User?               @relation("StandardRunCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  samples       StandardSample[]
+  reports       StandardReport[]
+  manualReviews StandardManualReview[]
+  measureChecks StandardMeasureCheck[]
+
+  @@index([bankReleaseId, createdAt])
+  @@index([previousTaskId])
+  @@index([status, evidenceCompleteness])
+  @@index([tenantId])
+  @@map("standard_runs")
+}
+
+model StandardSample {
+  id                  String                  @id @default(uuid())
+  standardRunId       String
+  standardRun         StandardRun             @relation(fields: [standardRunId], references: [id], onDelete: Restrict)
+  group               String
+  sequence            Int
+  revisionId          String
+  releaseItemId       String
+  releaseItem         StandardBankReleaseItem @relation(fields: [releaseItemId], references: [id], onDelete: Restrict)
+  inputSnapshot       String
+  expectedBehavior    String?
+  primaryCategory     String?
+  nonRefusalTopic     String?
+  responseStatus      String                  @default("PENDING")
+  selectedAttemptNo   Int?
+  selectedResponse    String?
+  selectedRawResponse Json?
+  selectedAt          DateTime?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  attempts  StandardSampleAttempt[]
+  judgments StandardJudgment[]
+
+  @@unique([standardRunId, group, sequence])
+  @@index([standardRunId, group, responseStatus])
+  @@map("standard_samples")
+}
+
+model StandardSampleAttempt {
+  id           String         @id @default(uuid())
+  sampleId     String
+  sample       StandardSample @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  attemptNo    Int
+  status       String
+  response     String?
+  rawResponse  Json?
+  latencyMs    Int?
+  httpStatus   Int?
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+
+  @@unique([sampleId, attemptNo])
+  @@index([sampleId, status])
+  @@map("standard_sample_attempts")
+}
+
+model StandardJudgment {
+  id             String             @id @default(uuid())
+  sampleId       String
+  sample         StandardSample     @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  source         String
+  ruleVersion    String
+  safetyOutcome  String?
+  refusalOutcome String?
+  qualityOutcome String?
+  reason         String?
+  evidence       String?
+  judgedById     String?
+  judgedBy       User?              @relation("StandardJudgmentBy", fields: [judgedById], references: [id], onDelete: SetNull)
+  previousId     String?
+  previous       StandardJudgment?  @relation("StandardJudgmentRevision", fields: [previousId], references: [id], onDelete: SetNull)
+  revisions      StandardJudgment[] @relation("StandardJudgmentRevision")
+  createdAt      DateTime           @default(now())
+
+  @@index([sampleId, source, createdAt])
+  @@map("standard_judgments")
+}
+
+model StandardReport {
+  id            String      @id @default(uuid())
+  standardRunId String
+  standardRun   StandardRun @relation(fields: [standardRunId], references: [id], onDelete: Restrict)
+  version       Int
+  title         String
+  conclusion    String
+  content       Json
+  generatedById String?
+  generatedBy   User?       @relation("StandardReportGeneratedBy", fields: [generatedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime    @default(now())
+
+  @@unique([standardRunId, version])
+  @@index([standardRunId, createdAt])
+  @@map("standard_reports")
+}
+
+model EvalTaskQuestionSet {
+  taskId        String
+  questionSetId String
+  task          EvalTask    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  questionSet   QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, questionSetId])
+  @@map("eval_task_question_sets")
+}
+
+model EvalTaskLog {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      EvalTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  level     String   @default("info") // info | warn | error
+  message   String
+  context   Json?
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+  @@map("eval_task_logs")
+}
+
+model EvalResult {
+  id             String          @id @default(uuid())
+  /// 所属租户
+  tenantId       String?
+  taskId         String
+  task           EvalTask        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question        @relation(fields: [questionId], references: [id])
+  modelTargetId  String
+  modelTarget    ModelTarget     @relation(fields: [modelTargetId], references: [id])
+  prompt         String
+  response       String?
+  usage          Json?
+  latencyMs      Int?
+  status         ModelCallStatus @default(SUCCESS)
+  errorMessage   String?
+  finalVerdict   Verdict?
+  finalScore     Float?
+  startedAt      DateTime?
+  endedAt        DateTime?
+  createdAt      DateTime        @default(now())
+  controlGroupId String?
+  side           String? // 'A'=裸模型 | 'B'=网关后模型；普通评测为 null
+
+  findings     Finding[]
+  wrongAnswers WrongAnswer[]
+  engineRuns   EngineRun[]
+
+  @@index([taskId])
+  @@index([questionId])
+  @@index([taskId, controlGroupId])
+  @@index([tenantId])
+  @@map("eval_results")
+}
+
+// ============================= 引擎判定（归一化）=============================
+model Finding {
+  id                            String                   @id @default(uuid())
+  /// 所属租户
+  tenantId                      String?
+  taskId                        String
+  task                          EvalTask                 @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  resultId                      String?
+  result                        EvalResult?              @relation(fields: [resultId], references: [id], onDelete: SetNull)
+  questionId                    String?
+  question                      Question?                @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  engine                        String
+  riskCategory                  String
+  severity                      Severity?
+  score                         Float?
+  verdict                       Verdict                  @default(UNKNOWN)
+  confidence                    Float?
+  evidenceStrength              String?
+  executionOutcome              String?
+  reviewStatus                  FindingReviewStatus      @default(UNREVIEWED)
+  reviewReason                  String?
+  remediationStatus             FindingRemediationStatus @default(OPEN)
+  remediationOwner              String?
+  remediationTeam               String?
+  remediationLocation           String?
+  remediationAction             String?
+  remediationDueAt              DateTime?
+  remediationRecord             String?
+  remediationAcceptanceCriteria String?
+  remediationRetestTaskId       String?
+  remediationRetestTask         EvalTask?                @relation("FindingRemediationRetestTask", fields: [remediationRetestTaskId], references: [id], onDelete: SetNull)
+  remediationClosureEvidence    String?
+  remediationClosedAt           DateTime?
+  suppressionKey                String?
+  title                         String?
+  evidence                      String?
+  detail                        Json?
+  createdAt                     DateTime                 @default(now())
+
+  assuranceAssessment        VulnerabilityAssessment?  @relation("AssuranceFinding")
+  legacyAssuranceAssessments VulnerabilityAssessment[] @relation("AssuranceLegacyFinding")
+  frameworkMappings          FindingFrameworkMapping[]
+
+  @@index([taskId])
+  @@index([taskId, reviewStatus])
+  @@index([suppressionKey])
+  @@index([remediationStatus, remediationDueAt])
+  @@index([createdAt])
+  @@index([tenantId])
+  @@map("findings")
+}
+
+model EngineRun {
+  id              String          @id @default(uuid())
+  taskId          String
+  task            EvalTask        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  resultId        String?
+  result          EvalResult?     @relation(fields: [resultId], references: [id], onDelete: SetNull)
+  engine          String
+  status          EngineRunStatus @default(PENDING)
+  startedAt       DateTime?
+  endedAt         DateTime?
+  durationMs      Int?
+  requestPayload  Json?
+  rawOutput       String? // 始终保留引擎原始输出，便于追溯
+  normalizedCount Int?
+  skippedCount    Int             @default(0)
+  errorMessage    String?
+  createdAt       DateTime        @default(now())
+
+  @@index([taskId])
+  @@index([taskId, status, skippedCount])
+  @@map("engine_runs")
+}
+
+// ============================= AI 服务安全核验 =============================
+model ServiceAssuranceRun {
+  id                       String                         @id @default(uuid())
+  /// 所属租户
+  tenantId                 String?
+  /// 可空：核验可独立发起，需要纳入报告时再关联评估任务（linkedAt 记录关联时间）。
+  taskId                   String?
+  task                     EvalTask?                      @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  linkedAt                 DateTime?
+  createdById              String?
+  createdBy                User?                          @relation("ServiceAssuranceRunCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  mode                     ServiceAssuranceMode
+  targetKind               ServiceAssuranceTargetKind
+  targetName               String
+  normalizedTarget         String?
+  scopePolicyRef           String
+  scopePolicySnapshot      Json?
+  scopePolicyDigest        String?
+  credentialRef            String?
+  authorizationConfirmed   Boolean                        @default(false)
+  authorizationConfirmedAt DateTime?
+  status                   ServiceAssuranceRunStatus      @default(PENDING)
+  coverageStatus           ServiceAssuranceCoverageStatus @default(NOT_READY)
+  failureCode              String?
+  failureMessage           String?
+  requestBudget            Json
+  rulesetVersion           String?
+  rulesetDigest            String?
+  vulnerabilityDbVersion   String?
+  vulnerabilityDbDigest    String?
+  engineVersions           Json?
+  startedAt                DateTime?
+  endedAt                  DateTime?
+  canceledAt               DateTime?
+  retestOfRunId            String?
+  retestOfRun              ServiceAssuranceRun?           @relation("ServiceAssuranceRunRetest", fields: [retestOfRunId], references: [id], onDelete: SetNull)
+  retests                  ServiceAssuranceRun[]          @relation("ServiceAssuranceRunRetest")
+  fixedAssessments         VulnerabilityAssessment[]      @relation("AssuranceAssessmentFixedByRun")
+  createdAt                DateTime                       @default(now())
+  updatedAt                DateTime                       @updatedAt
+
+  assets      ServiceAsset[]
+  components  ServiceComponent[]
+  assessments VulnerabilityAssessment[] @relation("AssuranceAssessmentRun")
+  evidence    ServiceEvidence[]
+
+  @@index([taskId, createdAt])
+  @@index([taskId, status])
+  @@index([createdById, createdAt])
+  @@index([retestOfRunId])
+  @@index([tenantId])
+  @@map("service_assurance_runs")
+}
+
+model ServiceAsset {
+  id                String              @id @default(uuid())
+  runId             String
+  run               ServiceAssuranceRun @relation(fields: [runId], references: [id], onDelete: Restrict)
+  customerName      String
+  normalizedAddress String
+  protocol          String?
+  host              String?
+  port              Int?
+  title             String?
+  tlsSummary        Json?
+  assetKey          String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  components  ServiceComponent[]
+  assessments VulnerabilityAssessment[]
+
+  @@unique([runId, assetKey])
+  @@index([assetKey])
+  @@map("service_assets")
+}
+
+model ServiceComponent {
+  id            String                 @id @default(uuid())
+  runId         String
+  run           ServiceAssuranceRun    @relation(fields: [runId], references: [id], onDelete: Restrict)
+  assetId       String?
+  asset         ServiceAsset?          @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  name          String
+  vendor        String?
+  version       String?
+  purl          String?
+  cpe           String?
+  hashes        Json?
+  source        String
+  confidence    Float?
+  evidenceLevel AssuranceEvidenceLevel
+  componentKey  String
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  assessments VulnerabilityAssessment[]
+  evidence    ServiceEvidence[]
+
+  @@unique([runId, componentKey])
+  @@index([assetId])
+  @@index([componentKey])
+  @@map("service_components")
+}
+
+model VulnerabilityAssessment {
+  id              String                 @id @default(uuid())
+  /// 所属租户
+  tenantId        String?
+  runId           String
+  run             ServiceAssuranceRun    @relation("AssuranceAssessmentRun", fields: [runId], references: [id], onDelete: Restrict)
+  assetId         String?
+  asset           ServiceAsset?          @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  componentId     String?
+  component       ServiceComponent?      @relation(fields: [componentId], references: [id], onDelete: SetNull)
+  advisoryId      String?
+  title           String
+  severity        Severity?
+  cvss            Float?
+  fixedVersion    String?
+  kev             Boolean?
+  epss            Float?
+  impactStatus    AssuranceImpactStatus
+  evidenceLevel   AssuranceEvidenceLevel
+  confidence      Float?
+  priority        AssurancePriority      @default(UNKNOWN)
+  reason          String
+  remediation     String?
+  reviewedById    String?
+  reviewedBy      User?                  @relation("AssuranceAssessmentReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt      DateTime?
+  reviewNote      String?
+  fixedByRunId    String?
+  fixedByRun      ServiceAssuranceRun?   @relation("AssuranceAssessmentFixedByRun", fields: [fixedByRunId], references: [id], onDelete: SetNull)
+  findingId       String?                @unique
+  finding         Finding?               @relation("AssuranceFinding", fields: [findingId], references: [id], onDelete: SetNull)
+  legacyFindingId String?
+  legacyFinding   Finding?               @relation("AssuranceLegacyFinding", fields: [legacyFindingId], references: [id], onDelete: SetNull)
+  assessmentKey   String
+  decidedAt       DateTime               @default(now())
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  evidence ServiceEvidence[]
+
+  @@unique([runId, assessmentKey])
+  @@index([runId, impactStatus])
+  @@index([assetId])
+  @@index([componentId])
+  @@index([legacyFindingId])
+  @@index([tenantId])
+  @@map("vulnerability_assessments")
+}
+
+model ServiceEvidence {
+  id              String                      @id @default(uuid())
+  runId           String
+  run             ServiceAssuranceRun         @relation(fields: [runId], references: [id], onDelete: Restrict)
+  assessmentId    String?
+  assessment      VulnerabilityAssessment?    @relation(fields: [assessmentId], references: [id], onDelete: SetNull)
+  componentId     String?
+  component       ServiceComponent?           @relation(fields: [componentId], references: [id], onDelete: SetNull)
+  evidenceType    String
+  sourceTool      String
+  ruleId          String?
+  ruleSummary     String?
+  matchedLocation String?
+  extractedValue  String?
+  customerSummary String
+  requestSummary  String?
+  responseSummary String?
+  contentSha256   String
+  visibility      AssuranceEvidenceVisibility @default(CUSTOMER)
+  createdAt       DateTime                    @default(now())
+
+  @@unique([runId, contentSha256, evidenceType])
+  @@index([assessmentId])
+  @@index([componentId])
+  @@map("service_evidence")
+}
+
+model AttackMemory {
+  memoryKey        String   @id
+  objectiveId      String
+  guardFingerprint String
+  playbookVariant  String
+  moveSequence     String[] @default([])
+  brokenLayers     String[] @default([])
+  redLayerReward   Float
+  ts               DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([objectiveId, guardFingerprint, redLayerReward])
+  @@map("attack_memory")
+}
+
+// ============================= 样本集 =============================
+model WrongAnswer {
+  id              String     @id @default(uuid())
+  /// 所属租户
+  tenantId        String?
+  taskId          String
+  task            EvalTask   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  resultId        String
+  result          EvalResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  questionId      String?
+  question        Question?  @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  questionContent String // 题干快照
+  modelResponse   String? // 模型回答快照
+  riskCategory    String?
+  severity        Severity?
+  verdict         Verdict    @default(FAIL)
+  reason          String? // 判定理由
+  engine          String?
+  createdAt       DateTime   @default(now())
+
+  @@index([taskId])
+  @@index([tenantId])
+  @@map("wrong_answers")
+}
+
+// ============================= 报告 =============================
+model Report {
+  id                String       @id @default(uuid())
+  /// 所属租户
+  tenantId          String?
+  /// 组合报告（kind = combined）不挂单个任务，为空；包含的任务见 reportTasks。
+  taskId            String?
+  task              EvalTask?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  evaluatedTargetId String?
+  evaluatedTarget   ModelTarget? @relation("ReportEvaluatedTarget", fields: [evaluatedTargetId], references: [id], onDelete: SetNull)
+  title             String
+  format            String       @default("markdown")
+  kind              String       @default("safety_overview")
+  content           String
+  summary           Json?
+  listSummary       Json?
+  passRate          Float?
+  totalQuestions    Int?
+  riskDistribution  Json?
+  generatedById     String?
+  generatedBy       User?        @relation("ReportGeneratedBy", fields: [generatedById], references: [id])
+  createdAt         DateTime     @default(now())
+  reportTasks       ReportTask[]
+
+  @@index([taskId])
+  @@index([taskId, kind])
+  @@index([evaluatedTargetId, createdAt])
+  @@index([tenantId])
+  @@map("reports")
+}
+
+/// 组合报告（2.6.3）包含的评估任务。taskId 不建外键：任务删除后保留记录，报告里标「任务已删除」。
+model ReportTask {
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  taskId   String
+  /// 在任务清单里的顺序，从 0 开始
+  position Int
+
+  @@id([reportId, taskId])
+  @@index([taskId])
+  @@map("report_tasks")
+}
+
+// ============================= Agent 攻击包同步与审核 =============================
+model AgentAttackPack {
+  id          String   @id @default(uuid())
+  name        String
+  sourceUrl   String
+  commitSha   String?
+  license     String?
+  contentHash String
+  status      String   @default("STAGED")
+  manifest    Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([sourceUrl, contentHash])
+  @@index([status])
+  @@map("agent_attack_packs")
+}
+
+// ============================= 审计日志 =============================
+model AuditLog {
+  id         String   @id @default(uuid())
+  /// 所属租户
+  tenantId   String?
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorName  String? // 快照
+  action     String
+  targetType String?
+  targetId   String?
+  ip         String?
+  userAgent  String?
+  detail     Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action, createdAt])
+  @@index([tenantId])
+  @@map("audit_logs")
+}
+
+// ============================= API 令牌（CI 调用）=============================
+/// 明文格式 lse_<prefix>_<random32>，只在创建时返回一次；库里只存 sha256。
+/// 仅能访问显式挂了 requireApiTokenOrUser(scope) 的接口，不能当用户会话使用。
+model ApiToken {
+  id            String    @id @default(uuid())
+  /// 所属租户
+  tenantId      String?
+  name          String
+  prefix        String    @unique
+  tokenHash     String    @unique
+  scopes        String[]
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  lastUsedAt    DateTime?
+  createdById   String?
+  createdByName String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([createdAt])
+  @@index([tenantId])
+  @@map("api_tokens")
+}
+
+// ============================= 上线门禁 =============================
+/// 门禁规则：按评估对象（modelTargetId）或评估计划（planId，W3a 合并后补外键）匹配任务。
+/// rules: { minScore?, maxHighRisk?, categoryMaxFailRate?: {类别: 0-1}, noRegression? }
+model GateRule {
+  id            String    @id @default(uuid())
+  /// 所属租户
+  tenantId      String?
+  name          String
+  planId        String?
+  plan          EvalPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  modelTargetId String?
+  rules         Json
+  enabled       Boolean   @default(true)
+  createdById   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  evaluations GateEvaluation[]
+
+  @@index([modelTargetId])
+  @@index([planId])
+  @@index([tenantId])
+  @@map("gate_rules")
+}
+
+/// 门禁判定存档：任务结束时自动判定一次（taskId 不建外键，任务删除后存档保留）。
+model GateEvaluation {
+  id             String   @id @default(uuid())
+  gateId         String
+  gate           GateRule @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  taskId         String
+  passed         Boolean
+  reasons        Json
+  metrics        Json?
+  previousTaskId String?
+  createdAt      DateTime @default(now())
+
+  @@index([gateId, createdAt])
+  @@index([taskId])
+  @@map("gate_evaluations")
+}
+
+// ============================= 策略建议（评估结果 → 网关策略） =============================
+enum PolicySuggestionStatus {
+  DRAFT
+  ACCEPTED
+  MODIFIED
+  REJECTED
+  DISPATCHED
+  GATEWAY_PENDING
+  PUBLISHED
+  GATEWAY_REJECTED
+}
+
+/// 由 Finding 按风险类别聚合、确定性模板 + 证据抽取生成的网关策略建议（不经大模型生成规则）。
+model PolicySuggestion {
+  id                  String                 @id @default(uuid())
+  /// 所属租户
+  tenantId            String?
+  /// 下发到网关时的幂等键（契约 external_id）。
+  externalId          String                 @unique
+  /// 生成范围：task:<id> 或 target:<id>；与 groupKey 共同保证重复生成不产生重复建议。
+  scopeKey            String
+  groupKey            String
+  /// 来源任务（复测父任务、下发前攻击成功率的统计口径）。
+  taskId              String
+  task                EvalTask               @relation("PolicySuggestionSourceTask", fields: [taskId], references: [id], onDelete: Cascade)
+  modelTargetId       String
+  riskCategory        String
+  /// prompt_injection | sensitive_data | content_category | tool_restriction
+  type                String
+  /// block | alert | mask
+  action              String
+  /// regex | keywords | field_names
+  matcherKind         String
+  matcherValue        Json
+  /// 生成时的原始 matcher（人工修改后保留对照）。
+  generatedMatcher    Json
+  examples            Json
+  sourceFindingIds    String[]
+  estimatedImpact     Json
+  generationNote      String?
+  status              PolicySuggestionStatus @default(DRAFT)
+  reviewNote          String?
+  reviewedById        String?
+  reviewedAt          DateTime?
+  gatewaySuggestionId String?
+  gatewayStatus       String?
+  ruleSetId           String?
+  ruleSetVersion      String?
+  dispatchedAt        DateTime?
+  dispatchedById      String?
+  dispatchError       String?
+  lastPolledAt        DateTime?
+  pollDeadlineAt      DateTime?
+  pollExpired         Boolean                @default(false)
+  preFailCount        Int?
+  preTotalCount       Int?
+  preAttackRate       Float?
+  postFailCount       Int?
+  postTotalCount      Int?
+  postAttackRate      Float?
+  retestStatus        String?
+  retestError         String?
+  retestTaskId        String?
+  retestTask          EvalTask?              @relation("PolicySuggestionRetestTask", fields: [retestTaskId], references: [id], onDelete: SetNull)
+  createdById         String?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@unique([tenantId, scopeKey, groupKey])
+  @@index([taskId])
+  @@index([status])
+  @@index([tenantId])
+  @@map("policy_suggestions")
+}
+
+// ============================= 模型文件扫描 / AIBOM =============================
+enum ModelFileScanSource {
+  UPLOAD
+  DIRECTORY
+}
+
+enum ModelFileScanStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ModelFileUploadStatus {
+  UPLOADING
+  READY
+  DELETED
+}
+
+model ModelFileUpload {
+  id            String                @id @default(uuid())
+  /// 所属租户
+  tenantId      String?
+  fileName      String
+  bytes         BigInt                @default(0)
+  expectedBytes BigInt?
+  sha256        String?
+  status        ModelFileUploadStatus @default(UPLOADING)
+  /// 只存上传标识，实际路径由上传目录和标识推导。
+  storedPath    String
+  createdById   String?
+  createdBy     User?                 @relation("ModelFileUploadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  completedAt   DateTime?
+  scans         ModelFileScan[]
+
+  @@index([status, updatedAt])
+  @@index([createdById, createdAt])
+  @@index([tenantId])
+  @@map("model_file_uploads")
+}
+
+model ModelFileScan {
+  id              String              @id @default(uuid())
+  /// 所属租户
+  tenantId        String?
+  source          ModelFileScanSource
+  uploadId        String?
+  upload          ModelFileUpload?    @relation(fields: [uploadId], references: [id], onDelete: SetNull)
+  path            String // 上传为文件名；目录扫描为白名单内的真实路径
+  targetId        String?
+  target          ModelTarget?        @relation(fields: [targetId], references: [id], onDelete: SetNull)
+  status          ModelFileScanStatus
+  error           String?
+  fileCount       Int                 @default(0)
+  totalBytes      BigInt              @default(0)
+  skippedCount    Int                 @default(0)
+  highCount       Int                 @default(0)
+  mediumCount     Int                 @default(0)
+  lowCount        Int                 @default(0)
+  files           Json? // [{path, format, bytes, sha256, meta}]
+  aibom           Json? // CycloneDX 1.6 ML-BOM
+  /// 队列执行：请求参数（AIBOM 补充字段、上传临时文件路径等）；执行完成后清除临时路径
+  request         Json?
+  progressFiles   Int                 @default(0)
+  progressBytes   BigInt              @default(0)
+  plannedFiles    Int                 @default(0)
+  plannedBytes    BigInt              @default(0)
+  /// 超数量/总量上限未扫描的模型文件数；>0 表示部分结果
+  truncatedCount  Int                 @default(0)
+  truncatedReason String?
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  createdById     String?
+  createdBy       User?               @relation("ModelFileScanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt       DateTime            @default(now())
+
+  findings ModelFileFinding[]
+
+  @@index([targetId, createdAt])
+  @@index([uploadId, createdAt])
+  @@index([createdAt])
+  @@index([tenantId])
+  @@map("model_file_scans")
+}
+
+model ModelFileFinding {
+  id                         String                   @id @default(uuid())
+  /// 所属租户
+  tenantId                   String?
+  scanId                     String
+  scan                       ModelFileScan            @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  filePath                   String
+  format                     String
+  severity                   Severity
+  ruleId                     String
+  title                      String
+  evidence                   String
+  riskCategory               String                   @default("组件安全")
+  /// 复核与整改（与评估任务 Finding 同一套状态枚举与流转规则；不挂 taskId）
+  reviewStatus               FindingReviewStatus      @default(UNREVIEWED)
+  reviewReason               String?
+  remediationStatus          FindingRemediationStatus @default(OPEN)
+  remediationOwner           String?
+  remediationAction          String?
+  remediationDueAt           DateTime?
+  remediationRecord          String?
+  remediationClosureEvidence String?
+  /// 验证关闭依据：对同一路径的复扫记录，且复扫中该文件不再命中同一规则
+  remediationRetestScanId    String?
+  remediationClosedAt        DateTime?
+  updatedAt                  DateTime                 @default(now()) @updatedAt
+  createdAt                  DateTime                 @default(now())
+
+  @@index([scanId])
+  @@index([severity])
+  @@index([reviewStatus])
+  @@index([remediationStatus, remediationDueAt])
+  @@index([tenantId])
+  @@map("model_file_findings")
+}
+
+// ============================= AI 资产测绘（影子 AI） =============================
+// 扫描范围配置存于 system_settings（key = asset_discovery.scope）；此处只存运行与命中结果。
+model AssetDiscoveryRun {
+  id            String    @id @default(uuid())
+  /// 所属租户
+  tenantId      String?
+  status        String    @default("PENDING") // PENDING | RUNNING | COMPLETED | FAILED
+  targets       String[]
+  ports         Int[]
+  hostCount     Int
+  portCount     Int
+  /// 实际探测的端点数（协议 + 主机 + 端口 + 路径前缀去重后）
+  endpointCount Int       @default(0)
+  probedCount   Int       @default(0)
+  hitCount      Int       @default(0)
+  error         String?
+  createdById   String?
+  createdByName String?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  hits AssetDiscoveryHit[]
+
+  @@index([createdAt])
+  @@index([tenantId])
+  @@map("asset_discovery_runs")
+}
+
+model AssetDiscoveryHit {
+  id           String            @id @default(uuid())
+  runId        String
+  run          AssetDiscoveryRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  host         String
+  port         Int
+  baseUrl      String
+  serviceType  String
+  models       String[]
+  /// 模型配置 [{ name, family?, parameterSize?, quantization?, contextLength? }]；旧记录为空
+  modelDetails Json?
+  evidence     String
+  createdAt    DateTime          @default(now())
+
+  @@index([runId])
+  @@map("asset_discovery_hits")
+}
+
+// ============================= RAG 专项评估 =============================
+/// 知识库：用户上传的测试文档集合（仅用于生成测试集与投毒/哨兵文档，不代替被测系统的知识库）。
+model RagCorpus {
+  id          String   @id @default(uuid())
+  /// 所属租户
+  tenantId    String?
+  name        String
+  description String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  documents RagDocument[]
+  chunks    RagChunk[]
+  testSets  RagTestSet[]
+
+  @@index([tenantId])
+  @@map("rag_corpora")
+}
+
+model RagDocument {
+  id         String    @id @default(uuid())
+  corpusId   String
+  corpus     RagCorpus @relation(fields: [corpusId], references: [id], onDelete: Cascade)
+  filename   String
+  format     String // txt | md | pdf | docx
+  sizeBytes  Int
+  sha256     String
+  textLength Int
+  chunkCount Int
+  createdAt  DateTime  @default(now())
+
+  chunks RagChunk[]
+
+  @@index([corpusId])
+  @@map("rag_documents")
+}
+
+model RagChunk {
+  id         String      @id @default(uuid())
+  corpusId   String
+  corpus     RagCorpus   @relation(fields: [corpusId], references: [id], onDelete: Cascade)
+  documentId String
+  document   RagDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  seq        Int
+  content    String
+  charStart  Int
+  charEnd    Int
+
+  @@unique([documentId, seq])
+  @@index([corpusId])
+  @@map("rag_chunks")
+}
+
+/// 测试集：由评估模型从切块生成（事实/多跳/无答案/干扰），外加平台模板生成的安全项。
+model RagTestSet {
+  id                 String    @id @default(uuid())
+  /// 所属租户
+  tenantId           String?
+  corpusId           String
+  corpus             RagCorpus @relation(fields: [corpusId], references: [id], onDelete: Cascade)
+  name               String
+  seed               String
+  promptVersion      String
+  judgeModelName     String?
+  generationStats    Json?
+  /// 平台生成的投毒/间接注入测试文档（Markdown 原文）与其金丝雀标记。
+  poisonDocument     String
+  poisonCanary       String
+  /// 平台生成的越权读取哨兵文档与哨兵字符串。
+  sentinelDocument   String
+  sentinelToken      String
+  /// 知识对齐模式：KB_EXISTING | TEST_PACKAGE | RETRIEVAL_API（旧数据回填 KB_EXISTING）。
+  alignmentMode      String    @default("KB_EXISTING")
+  /// 生成状态：READY | GENERATING | FAILED | CANCELED（旧数据回填 READY）。
+  generationStatus   String    @default("READY")
+  /// 生成进度：{ planned, done, generated, failed }。
+  generationProgress Json?
+  generationError    String?
+  createdById        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  items RagTestItem[]
+  runs  RagEvalRun[]
+
+  @@index([corpusId])
+  @@index([tenantId])
+  @@map("rag_test_sets")
+}
+
+model RagTestItem {
+  id              String     @id @default(uuid())
+  testSetId       String
+  testSet         RagTestSet @relation(fields: [testSetId], references: [id], onDelete: Cascade)
+  /// FACT | MULTI_HOP | NO_ANSWER | DISTRACTOR | POISON | INDIRECT_INJECTION | CROSS_ACCESS
+  type            String
+  question        String
+  referenceAnswer String?
+  sourceChunkIds  String[]
+  /// GENERATED | TEMPLATE | MANUAL | EDITED
+  origin          String     @default("GENERATED")
+  metadata        Json?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  results RagEvalResult[]
+
+  @@index([testSetId])
+  @@map("rag_test_items")
+}
+
+/// 一次 RAG 评估运行，对应一个真实 EvalTask（engines = ["rag-eval"]），Finding 挂在该任务上。
+model RagEvalRun {
+  id                       String      @id @default(uuid())
+  /// 所属租户
+  tenantId                 String?
+  taskId                   String      @unique
+  task                     EvalTask    @relation("EvalTaskRagEvalRun", fields: [taskId], references: [id], onDelete: Cascade)
+  testSetId                String
+  testSet                  RagTestSet  @relation(fields: [testSetId], references: [id], onDelete: Restrict)
+  modelTargetId            String
+  modelTarget              ModelTarget @relation(fields: [modelTargetId], references: [id], onDelete: Restrict)
+  status                   String      @default("PENDING")
+  poisonDocumentImported   Boolean     @default(false)
+  sentinelDocumentImported Boolean     @default(false)
+  /// 本次运行使用的知识对齐模式（发起时从测试集快照）。
+  alignmentMode            String      @default("KB_EXISTING")
+  /// 模式 A：确认“文档已在被测系统知识库中并完成索引”的人和时间。
+  alignmentConfirmedById   String?
+  alignmentConfirmedByName String?
+  alignmentConfirmedAt     DateTime?
+  /// 模式 B：测试知识库包已由用户手工导入被测系统。
+  packageImported          Boolean     @default(false)
+  /// 索引就绪探测结果与自动上传/清理记录。
+  indexProbe               Json?
+  uploads                  Json?
+  cleanup                  Json?
+  summary                  Json?
+  error                    String?
+  createdById              String?
+  createdAt                DateTime    @default(now())
+  updatedAt                DateTime    @updatedAt
+
+  results RagEvalResult[]
+
+  @@index([testSetId])
+  @@index([tenantId])
+  @@map("rag_eval_runs")
+}
+
+model RagEvalResult {
+  id                 String       @id @default(uuid())
+  runId              String
+  run                RagEvalRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
+  itemId             String?
+  item               RagTestItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  itemType           String
+  question           String
+  referenceAnswer    String?
+  response           String?
+  citations          Json?
+  /// SUCCESS | ERROR | RESTRICTED
+  status             String
+  errorMessage       String?
+  correctness        Float?
+  faithfulness       Float?
+  refusalOk          Boolean?
+  citationAccuracy   Float?
+  injectionFollowed  Boolean?
+  sentinelLeaked     Boolean?
+  /// 被测系统本次返回的检索上下文（contextPath）；模式 C 为检索接口结果。
+  retrievedContext   Json?
+  /// 模式 C：首个命中来源文档的名次（1 起），未命中为 null；retrievalEvaluated 表示是否评估了检索。
+  retrievalRank      Int?
+  retrievalEvaluated Boolean      @default(false)
+  /// 各指标未评估原因：{ faithfulness?, citation?, correctness?, retrieval?, refusal? }。
+  notEvaluated       Json?
+  /// 需人工复核（如模式 A 无答案题未拒答但给出答案）。
+  needsReview        Boolean      @default(false)
+  verdict            Verdict      @default(UNKNOWN)
+  reason             String?
+  latencyMs          Int?
+  findingId          String?
+  createdAt          DateTime     @default(now())
+
+  @@index([runId])
+  @@map("rag_eval_results")
+}
+
+// ============================= 模型指纹 =============================
+enum ModelFingerprintSource {
+  MANUAL
+  PRE_TASK
+}
+
+/// 模型指纹：固定探针集的真实采集输出与特征。参考指纹只来自平台真实采集。
+model ModelFingerprint {
+  id            String                 @id @default(uuid())
+  /// 所属租户
+  tenantId      String?
+  modelTargetId String
+  modelTarget   ModelTarget            @relation(fields: [modelTargetId], references: [id], onDelete: Cascade)
+  probeVersion  String
+  /// [{probeId, output(≤2000 字), error?}]
+  outputs       Json
+  /// [{probeId, length, refused, jsonParsable, text}]
+  features      Json
+  source        ModelFingerprintSource @default(MANUAL)
+  isBaseline    Boolean                @default(false)
+  createdById   String?
+  createdByName String?
+  createdAt     DateTime               @default(now())
+
+  @@index([modelTargetId, createdAt])
+  @@index([modelTargetId, isBaseline])
+  @@index([tenantId])
+  @@map("model_fingerprints")
+}
+
+model FindingFrameworkMapping {
+  id          String   @id @default(uuid())
+  findingId   String
+  finding     Finding  @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  framework   String
+  entryId     String
+  entryName   String
+  action      String   @default("UPSERT")
+  reason      String
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@unique([findingId, framework, entryId])
+  @@index([findingId])
+  @@index([framework, entryId])
+  @@map("finding_framework_mappings")
+}
+
+// ============================= AI 组件漏洞扫描（Skill / MCP / 插件） =============================
+// 独立于评估任务：扫描记录与发现项自成体系，只有显式“关联评估任务”时才复制进 findings 表。
+model AiComponentScan {
+  id            String    @id @default(uuid())
+  /// 所属租户
+  tenantId      String?
+  assetName     String
+  assetType     String // SKILL | MCP | PLUGIN
+  assetVersion  String?
+  /// 资产归一键（类型+名称小写），用于同一资产多次扫描对比与工具描述基线。
+  assetKey      String
+  sourceType    String // UPLOAD | ARCHIVE | MCP_ENDPOINT
+  sourceLabel   String?
+  contentSha256 String?
+  status        String    @default("COMPLETED") // COMPLETED | FAILED
+  error         String?
+  fileCount     Int       @default(0)
+  totalBytes    Int       @default(0)
+  skippedCount  Int       @default(0)
+  criticalCount Int       @default(0)
+  highCount     Int       @default(0)
+  mediumCount   Int       @default(0)
+  lowCount      Int       @default(0)
+  /// [{path, bytes, sha256}]
+  files         Json?
+  /// MCP 在线拉取的工具/提示/资源定义快照（不含鉴权头）。
+  snapshot      Json?
+  /// 评估模型复核状态：NOT_CONFIGURED | REVIEWED | FAILED | NOT_NEEDED
+  judgeStatus   String?
+  /// 重新扫描用：已扫描文本文件的 gzip(JSON) 快照；超过上限时为空（页面提示需重新上传）
+  inputBlob     Bytes?
+  /// MCP 在线拉取的服务地址（不含鉴权头）
+  endpointUrl   String?
+  linkedTaskId  String?
+  linkedAt      DateTime?
+  createdById   String?
+  createdByName String?
+  createdAt     DateTime  @default(now())
+
+  findings AiComponentFinding[]
+
+  @@index([assetKey, createdAt])
+  @@index([createdAt])
+  @@index([tenantId])
+  @@map("ai_component_scans")
+}
+
+model AiComponentFinding {
+  id              String          @id @default(uuid())
+  /// 所属租户
+  tenantId        String?
+  scanId          String
+  scan            AiComponentScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  ruleId          String
+  severity        Severity
+  riskCategory    String
+  title           String
+  description     String
+  remediation     String
+  filePath        String?
+  line            Int?
+  /// [{path, line, excerpt}]，已脱敏，最多 20 处
+  locations       Json?
+  evidence        String?
+  confidence      Float
+  /// 跨扫描比对指纹：ruleId + 文件路径 + 规范化证据
+  fingerprint     String
+  /// PENDING | CONFIRMED | FALSE_POSITIVE
+  reviewStatus    String          @default("PENDING")
+  reviewNote      String?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  detail          Json?
+  /// 显式关联评估任务后写入的 findings.id
+  linkedFindingId String?
+  createdAt       DateTime        @default(now())
+
+  @@index([scanId, severity])
+  @@index([tenantId])
+  @@map("ai_component_findings")
+}
+
+/// MCP 工具描述哈希基线：同一资产再次扫描时比对（rug pull），跨资产同名工具（shadowing）。
+model AiComponentToolBaseline {
+  id              String   @id @default(uuid())
+  /// 所属租户
+  tenantId        String?
+  assetKey        String
+  toolName        String
+  descriptionHash String
+  description     String
+  /// 基线的参数定义与工具注解（旧数据为空，表示当时未记录）
+  inputSchema     Json?
+  annotations     Json?
+  firstScanId     String
+  lastScanId      String
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+
+  @@unique([tenantId, assetKey, toolName])
+  @@index([toolName])
+  @@index([tenantId])
+  @@map("ai_component_tool_baselines")
+}
+
+// Authenticated evidence assessment imported from an independent agent platform.
+// This evaluates the supplied static findings; it never claims to execute a skill or MCP tool.
+model ExternalAssetAssessment {
+  id                    String   @id @default(uuid())
+  /// 所属租户
+  tenantId              String?
+  sourceRequestId       String
+  sourceTenantId        String
+  sourceAssetId         String
+  sourceInstanceId      String
+  sourceEndpointId      String?
+  sourceEndpointAssetId String?
+  sourceEndpointName    String?
+  assetType             String
+  contentHash           String
+  rulesetVersion        String
+  coverage              String
+  verdict               String
+  findings              Json
+  report                Json
+  createdById           String
+  createdAt             DateTime @default(now())
+
+  @@unique([tenantId, sourceRequestId])
+  @@index([sourceTenantId, sourceAssetId, createdAt])
+  @@index([tenantId])
+  @@map("external_asset_assessments")
+}
+
+// 多模态「客户自带图片集」：客户上传的图片字节（平台不内置图库）。随样本库级联删除；
+// 访问只经带鉴权与属主校验的接口，且仅保存与本次评测有关的图片。
+model ByoImage {
+  id            String      @id @default(uuid())
+  questionSetId String
+  questionSet   QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  name          String
+  mimeType      String
+  sha256        String
+  sizeBytes     Int
+  width         Int         @default(0)
+  height        Int         @default(0)
+  data          Bytes
+  createdAt     DateTime    @default(now())
+
+  @@index([questionSetId, sha256])
+  @@map("byo_images")
+}
+
+// ============================= 自管终端接入（鉴盾独立版探针） =============================
+// 设计见 docs/endpoint-fleet/probe-sharing-design.md、协议见 docs/endpoint-fleet/protocol-subset.md。
+// 原则：一台终端同一时刻只听一个服务端；令牌/接入码只存 SHA-256；终端级数据按令牌→终端隔离。
+
+enum FleetEnrollmentStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum FleetEndpointStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum FleetJobStatus {
+  PENDING_APPROVAL
+  QUEUED
+  DELIVERED
+  RUNNING
+  COMPLETED
+  FAILED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+/// 接入码：明文只在创建时返回一次，库内只存 SHA-256。
+model FleetEnrollmentCode {
+  id          String                @id @default(uuid())
+  /// 所属租户
+  tenantId    String?
+  label       String
+  codeHash    String                @unique
+  /// 明文前 6 位（jdc_xxxx），仅用于界面区分，不能还原。
+  codePrefix  String
+  maxUses     Int                   @default(1)
+  usedCount   Int                   @default(0)
+  expiresAt   DateTime
+  status      FleetEnrollmentStatus @default(ACTIVE)
+  createdById String?
+  createdBy   User?                 @relation("FleetCodeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime              @default(now())
+  revokedAt   DateTime?
+
+  endpoints FleetEndpoint[]
+
+  @@index([status, expiresAt])
+  @@index([tenantId])
+  @@map("fleet_enrollment_codes")
+}
+
+/// 终端：由采集器用接入码登记；端点令牌只存哈希。
+model FleetEndpoint {
+  id               String               @id @default(uuid())
+  /// 所属租户
+  tenantId         String?
+  /// 对采集器暴露的 ID（ep_ + 20 hex），避免内部 UUID 外泄。
+  publicId         String               @unique
+  installationId   String               @unique
+  machineId        String
+  hostname         String
+  os               String
+  osVersion        String               @default("")
+  arch             String               @default("")
+  osUser           String               @default("")
+  agentVersion     String               @default("")
+  capabilities     String[]
+  tokenHash        String               @unique
+  status           FleetEndpointStatus  @default(ACTIVE)
+  /// 来自心跳 health：{ capabilities: { eval_runner: "1" }, collector: {...} }，原样保存（限长）。
+  lastHealth       Json?
+  evalRunner       String?
+  lastSeenAt       DateTime?
+  enrollmentCodeId String?
+  enrollmentCode   FleetEnrollmentCode? @relation(fields: [enrollmentCodeId], references: [id], onDelete: SetNull)
+  registeredAt     DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  revokedAt        DateTime?
+  removedAt        DateTime?
+  /// 责任人（资产台账）：姓名必填才算设置；可关联本租户的平台用户，也可以是平台外的人。
+  ownerName        String?
+  ownerDepartment  String?
+  ownerUserId      String?
+  ownerUpdatedAt   DateTime?
+
+  reports      FleetProbeReport[]
+  jobs         FleetEvalJob[]
+  ledgerAssets LedgerAsset[]
+
+  @@index([machineId])
+  @@index([lastSeenAt])
+  @@index([tenantId])
+  @@map("fleet_endpoints")
+}
+
+/// 体检上报（aiprobe.report.v1），同一 reportId 幂等。
+model FleetProbeReport {
+  id         String        @id @default(uuid())
+  /// 所属租户
+  tenantId   String?
+  endpointId String
+  endpoint   FleetEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  reportId   String        @unique
+  scannedAt  DateTime
+  status     String
+  assetCount Int           @default(0)
+  bodyHash   String
+  /// 完整报告（≤ 8 MiB，上限在路由层）；资产清单用于「配置体检」判定。
+  body       Json
+  createdAt  DateTime      @default(now())
+
+  @@index([endpointId, scannedAt])
+  @@index([tenantId])
+  @@map("fleet_probe_reports")
+}
+
+/// 测评任务：服务端状态机 pending_approval → queued → delivered → running → completed|failed。
+model FleetEvalJob {
+  id               String         @id @default(uuid())
+  /// 所属租户
+  tenantId         String?
+  /// 下发给采集器的 job_id（lej_ + 32 hex），进 URL 路径。
+  publicId         String         @unique
+  endpointId       String
+  endpoint         FleetEndpoint  @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  /// 关联的鉴盾评估任务（EvalTask），结果回写走现有入库路径。
+  evalTaskId       String?
+  product          String
+  /// 下发 payload 的 canonical JSON 原文（创建时固化，下发时原样使用）。
+  payloadCanonical String
+  checksum         String
+  scenarioCount    Int
+  status           FleetJobStatus @default(PENDING_APPROVAL)
+  requestedById    String?
+  requestedBy      User?          @relation("FleetJobRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  reason           String         @default("")
+  approvedById     String?
+  approvedBy       User?          @relation("FleetJobApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt       DateTime?
+  rejectReason     String?
+  /// 采集器必须在此时间前 ack/started；result 允许 deadline + 10 分钟。
+  deadline         DateTime
+  deliveredAt      DateTime?
+  startedAt        DateTime?
+  finishedAt       DateTime?
+  /// 采集器回传的 result（≤ 2 MiB，已通过 ValidateResult 校验）。
+  result           Json?
+  errorCode        String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([endpointId, status])
+  @@index([status, createdAt])
+  @@index([tenantId])
+  @@map("fleet_eval_jobs")
+}
+
+model AgentSample {
+  id             String               @id
+  /// 所属租户（空 = 平台共享）
+  tenantId       String?
+  suite          String
+  source         String
+  enabled        Boolean              @default(true)
+  currentVersion Int                  @default(1)
+  labels         String[]             @default([])
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  versions       AgentSampleVersion[]
+
+  @@index([tenantId])
+  @@map("agent_samples")
+}
+
+model AgentSampleVersion {
+  sampleId     String
+  version      Int
+  content      Json
+  digest       String
+  legacyDigest String?
+  createdById  String?
+  createdAt    DateTime           @default(now())
+  changeNote   String             @default("")
+  sample       AgentSample        @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  trials       AgentSampleTrial[]
+
+  @@id([sampleId, version])
+  @@map("agent_sample_versions")
+}
+
+model AgentSampleTrial {
+  id          String             @id @default(uuid())
+  /// 所属租户
+  tenantId    String?
+  sampleId    String
+  version     Int
+  taskId      String             @unique
+  createdById String?
+  createdAt   DateTime           @default(now())
+  sample      AgentSampleVersion @relation(fields: [sampleId, version], references: [sampleId, version], onDelete: Cascade)
+
+  @@index([sampleId, version, createdAt])
+  @@index([tenantId])
+  @@map("agent_sample_trials")
+}
+
+model AgentSamplePlan {
+  id       String  @id
+  name     String
+  builtin  Boolean @default(false)
+  samples  Json
+  settings Json
+
+  @@map("agent_sample_plans")
+}
+
+// ============================= GB/T 45654 人工抽检与措施核验（车道 C2） =============================
+/// 人工抽检：对冻结抽样名单逐条复核。slot 1 为复核人，slot 2 为第二复核人（可选），slot 3 为分歧裁定。
+model StandardManualReview {
+  id              String      @id @default(uuid())
+  runId           String
+  run             StandardRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  sampleId        String
+  slot            Int         @default(1)
+  reviewerId      String
+  reviewerName    String
+  /// PASS 合格 | FAIL 不合格
+  verdict         String
+  /// 不合格时选择的附录 A 小项编号，例如 A.2.e
+  itemCode        String?
+  note            String?
+  /// 复核时分类模型给出的标签快照（项编号或「安全」）
+  classifierLabel String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([sampleId, slot])
+  @@index([runId, slot])
+  @@index([runId, reviewerId])
+  @@map("standard_manual_reviews")
+}
+
+/// 第 6 章措施核验：违规输入处置探测、显式标识检查（平台取证、复核人确认）与人工填报条款。
+model StandardMeasureCheck {
+  id              String      @id @default(uuid())
+  runId           String
+  run             StandardRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  clauseId        String
+  /// PROBE 平台取证 | FORM 人工填报
+  kind            String
+  /// 平台取证的证据（对话记录、命中统计等）
+  evidence        Json?
+  /// conform | nonconform | not_applicable；空表示待确认
+  verdict         String?
+  note            String?
+  materials       String?
+  confirmedById   String?
+  confirmedByName String?
+  confirmedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([runId, clauseId])
+  @@index([runId])
+  @@map("standard_measure_checks")
+}
+
+/// GB/T 45654 附录 B 关键词库：按附录 A 小项存放。tenantId 为空表示平台共享词表。
+model StandardKeyword {
+  id              String    @id @default(uuid())
+  tenantId        String?
+  /// 附录 A 小项编号，例如 A.2.e
+  itemCode        String
+  term            String
+  /// 来源：builtin:gbt45654（平台起步词表）、import:csv、import:txt、manual
+  source          String    @default("manual")
+  /// approved 生效 / pending 候选 / disabled 停用 / rejected 已剔除（版本淘汰）
+  reviewStatus    String    @default("pending")
+  /// 最后一次人工改状态的时间与用户名
+  statusChangedAt DateTime?
+  statusChangedBy String?
+  createdAt       DateTime  @default(now())
+
+  @@unique([tenantId, itemCode, term])
+  @@index([itemCode])
+  @@index([tenantId])
+  @@map("standard_keywords")
+}
+
+/// 语料扫描自定义规则集（1.2.3），租户内。
+model CorpusRuleSet {
+  id          String       @id @default(uuid())
+  tenantId    String?
+  name        String
+  description String?
+  createdById String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  rules       CorpusRule[]
+  scans       CorpusScan[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("corpus_rule_sets")
+}
+
+/// 语料自定义规则：关键词或正则（正则不超过 500 字、拒绝嵌套量词），带类别名、严重度、启用。
+model CorpusRule {
+  id        String        @id @default(uuid())
+  tenantId  String?
+  ruleSetId String
+  ruleSet   CorpusRuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+  /// keyword | regex
+  kind      String
+  pattern   String
+  category  String
+  /// CRITICAL | HIGH | MEDIUM | LOW
+  severity  String        @default("MEDIUM")
+  enabled   Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([ruleSetId, kind, pattern])
+  @@index([tenantId])
+  @@map("corpus_rules")
+}
+
+/// 语料扫描（1.2.1、1.2.2、1.2.3、1.2.5）：文件放在 CORPUS_STORAGE_DIR/<storageKey>，扫完保留，删除扫描时删文件。
+model CorpusScan {
+  id             String          @id @default(uuid())
+  tenantId       String?
+  /// 上传时的文件名，只用于展示
+  fileName       String
+  storageKey     String          @unique
+  bytes          BigInt
+  sha256         String
+  /// 打码副本的文件 ID（与原文件同目录），扫描完成时由 worker 生成
+  maskedKey      String?         @unique
+  /// 原文件和打码副本超过保留天数被清理的时间（扫描结果保留）
+  filesPurgedAt  DateTime?
+  /// 选的格式：auto | alpaca | sharegpt | messages | prompt_completion | chosen_rejected | csv | txt
+  format         String          @default("auto")
+  /// 识别出的格式（自动识别时取第一条合法记录的格式）
+  detectedFormat String?
+  /// jsonl | json | csv | txt
+  container      String?
+  /// CSV 选的列，空为全部列
+  csvColumns     Json?
+  ruleSetId      String?
+  ruleSet        CorpusRuleSet?  @relation(fields: [ruleSetId], references: [id], onDelete: SetNull)
+  judgeReview    Boolean         @default(false)
+  judgeLimit     Int             @default(200)
+  /// PENDING | RUNNING | COMPLETED | FAILED
+  status         String          @default("PENDING")
+  error          String?
+  progressBytes  BigInt          @default(0)
+  totalRecords   Int             @default(0)
+  invalidRecords Int             @default(0)
+  /// 命中总数（含超出上限没存的）
+  findingCount   Int             @default(0)
+  storedFindings Int             @default(0)
+  truncated      Boolean         @default(false)
+  /// 各类别和子类的命中数、非法行样例、格式分布等
+  stats          Json?
+  judgeReviewed  Int             @default(0)
+  judgeNote      String?
+  createdById    String?
+  createdAt      DateTime        @default(now())
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  findings       CorpusFinding[]
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("corpus_scans")
+}
+
+/// 语料扫描命中：命中原文按客户要求不打码；每次扫描最多存 50,000 条，超出只计数。
+model CorpusFinding {
+  id            String     @id @default(uuid())
+  tenantId      String?
+  scanId        String
+  scan          CorpusScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  /// 记录序号（从 1 起）和记录起始行号
+  recordIndex   Int
+  line          Int
+  fieldPath     String
+  /// violation 违规内容 | sensitive 敏感信息 | custom 自定义规则
+  category      String
+  /// 违规：条目编码 A.x.y；敏感：类型；自定义：规则类别名
+  subtype       String
+  subtypeLabel  String?
+  ruleId        String?
+  matchText     String
+  contextBefore String     @default("")
+  contextAfter  String     @default("")
+  severity      String
+  /// 裁判复核：CONFIRMED 确认违规 | DISMISSED 判为误报 | ERROR 复核失败
+  judgeVerdict  String?
+  judgeReason   String?
+  createdAt     DateTime   @default(now())
+
+  @@index([scanId, category])
+  @@index([scanId, recordIndex])
+  @@index([tenantId])
+  @@map("corpus_findings")
+}
+
+/// GB/T 45654 题库与关键词库的更新记录（附录 B.1 c)、B.2 d)、B.3 c)：关键词每周、题库每月更新）。
+/// 平台级、不分租户：和 StandardBankRelease 一样不登记进 tenant-models.ts 的两份清单；
+/// 内置题库是平台共有的，更新由系统定时任务或平台管理员触发，各租户只读。
+model GbtBankUpdate {
+  id             String    @id @default(uuid())
+  /// questions 题库 / keywords 关键词库
+  kind           String
+  /// 题库形如 2026.12.1；关键词为日期 2026-11-17
+  version        String
+  /// release 随版本发布 / schedule 定时 / manual 手动
+  trigger        String
+  /// running / succeeded / failed / skipped
+  status         String    @default("running")
+  actorName      String?
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+  /// 按库、按小项的新增数
+  added          Json?
+  retired        Json?
+  /// 更新后各库总数
+  totals         Json?
+  generatorModel String?
+  judgeModel     String?
+  note           String?
+  error          String?
+
+  @@index([kind, startedAt])
+  @@map("gbt_bank_updates")
+}
+
+// ============================= 数据字典（2.9.4）=============================
+/// 平台级、不分租户：读要 system_setting:read，写要 system_setting:update（平台级权限）。
+model DictType {
+  id          String     @id @default(uuid())
+  /// 小写字母开头，只含小写字母、数字、下划线；建好后不改
+  code        String     @unique
+  name        String
+  description String?
+  /// 内置类型不能删除
+  builtin     Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  items       DictItem[]
+
+  @@map("dict_types")
+}
+
+model DictItem {
+  id        String   @id @default(uuid())
+  typeId    String
+  type      DictType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  value     String
+  label     String
+  sort      Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([typeId, value])
+  @@index([typeId, sort])
+  @@map("dict_items")
+}
+
+// ============================= 技术支持与意见反馈（2.9.11、2.9.12）=============================
+enum SupportTicketKind {
+  SUPPORT
+  FEEDBACK
+}
+
+enum SupportTicketStatus {
+  OPEN
+  REPLIED
+  CLOSED
+}
+
+/// 工单按提交人所在租户归属（tenant-models.ts 的 owned 清单）；support:manage（平台级）看全部租户的工单。
+model SupportTicket {
+  id          String               @id @default(uuid())
+  /// 所属租户
+  tenantId    String?
+  kind        SupportTicketKind
+  title       String
+  content     String
+  status      SupportTicketStatus  @default(OPEN)
+  createdById String?
+  createdBy   User?                @relation("SupportTicketCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  replies     SupportTicketReply[]
+
+  @@index([tenantId])
+  @@index([createdById])
+  @@index([kind, status, updatedAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketReply {
+  id        String        @id @default(uuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String?
+  author    User?         @relation("SupportTicketReplyAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  content   String
+  createdAt DateTime      @default(now())
+
+  @@index([ticketId, createdAt])
+  @@map("support_ticket_replies")
+}
+
+// ============================= 组织架构（2.9.3）=============================
+/// 租户内的组织树（tenant-models.ts 的 owned 清单），最多 8 级（根为第 1 级）。
+/// 同一上级下不重名、不分大小写，靠迁移 20261121120000_organizations 里的两条唯一索引：
+/// organizations_tenantId_parentId_lower_name_key（表达式索引）和
+/// organizations_tenantId_lower_name_root_key（根节点 parentId 为空，部分索引）。Prisma 写不出这两种索引。
+/// 删除时有下级或成员就拒绝，不级联。
+model Organization {
+  id           String         @id @default(uuid())
+  tenantId     String
+  parentId     String?
+  parent       Organization?  @relation("OrganizationTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children     Organization[] @relation("OrganizationTree")
+  name         String
+  sort         Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  members      User[]         @relation("UserOrganization")
+  ledgerAssets LedgerAsset[]
+
+  @@index([tenantId])
+  @@index([parentId])
+  @@map("organizations")
+}
+
+/// 工具中心（2.3.x）：平台级内容，所有租户共用，不带 tenantId
+model Tool {
+  id           String         @id @default(uuid())
+  /// 唯一编码：小写字母、数字、连字符
+  code         String         @unique
+  name         String
+  /// 检测类别（@lse/shared 的 DETECT_CATEGORIES）
+  category     String
+  description  String         @default("")
+  /// 操作说明：纯文本，页面按段落和换行显示
+  instructions String         @default("")
+  /// 配置参数：[{name,label,description,defaultValue,required}]
+  configParams Json           @default("[]")
+  /// 快速建任务入口：@lse/shared 的 TOOL_TASK_ENTRIES 的 key
+  taskEntry    String?
+  enabled      Boolean        @default(true)
+  hidden       Boolean        @default(false)
+  /// 内置工具（终端探针）：不能删除、不能禁用
+  builtin      Boolean        @default(false)
+  createdById  String?
+  createdBy    User?          @relation("ToolCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  versions     ToolVersion[]
+  manuals      ToolManual[]
+  downloads    ToolDownload[]
+
+  @@map("tools")
+}
+
+/// 工具的一个版本：同一版本按操作系统、硬件架构各一个文件
+model ToolVersion {
+  id           String         @id @default(uuid())
+  toolId       String
+  tool         Tool           @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  version      String
+  /// linux | windows | macos | any
+  os           String
+  /// amd64 | arm64 | any
+  arch         String
+  /// 展示用的文件名；磁盘上的文件名只用 storageKey
+  filename     String
+  size         BigInt
+  sha256       String
+  storageKey   String         @unique
+  releaseNotes String         @default("")
+  createdById  String?
+  createdBy    User?          @relation("ToolVersionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt    DateTime       @default(now())
+  downloads    ToolDownload[]
+
+  @@unique([toolId, version, os, arch])
+  @@map("tool_versions")
+}
+
+/// 工具操作手册：「更新」是替换文件，id 不变
+model ToolManual {
+  id          String         @id @default(uuid())
+  toolId      String
+  tool        Tool           @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  title       String
+  filename    String
+  size        BigInt
+  sha256      String
+  storageKey  String         @unique
+  mime        String
+  createdById String?
+  createdBy   User?          @relation("ToolManualCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  downloads   ToolDownload[]
+
+  @@index([toolId])
+  @@map("tool_manuals")
+}
+
+/// 工具下载记录（下载溯源）：未登录下载探针包时 userId 为空
+model ToolDownload {
+  id        String       @id @default(uuid())
+  toolId    String
+  tool      Tool         @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  versionId String?
+  version   ToolVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  manualId  String?
+  manual    ToolManual?  @relation(fields: [manualId], references: [id], onDelete: SetNull)
+  /// package | manual
+  kind      String
+  userId    String?
+  user      User?        @relation("ToolDownloadUser", fields: [userId], references: [id], onDelete: SetNull)
+  /// 快照
+  username  String?
+  tenantId  String?
+  ip        String
+  userAgent String?
+  /// 下载的文件名快照（版本文件名、探针包文件名、手册文件名）
+  filename  String?
+  createdAt DateTime     @default(now())
+
+  @@index([toolId, createdAt])
+  @@index([userId, createdAt])
+  @@map("tool_downloads")
+}
+
+/// 检测策略（2.4.3）：子任务清单（工具 + 规则参数）+ 执行周期。
+model DetectStrategy {
+  id                 String      @id @default(uuid())
+  tenantId           String?
+  name               String
+  description        String      @default("")
+  /// 子任务清单 [{ kind, title, params, toolId?, ledgerAssetId? }]，与组合任务子任务同一套校验（detect-jobs/item-params.ts）
+  items              Json
+  maxParallel        Int         @default(4)
+  /// 为空表示只手动执行
+  cron               String?
+  timezone           String      @default("Asia/Shanghai")
+  enabled            Boolean     @default(true)
+  minIntervalMinutes Int         @default(60)
+  lastTriggeredAt    DateTime?
+  lastSkipReason     String?
+  createdById        String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  jobs               DetectJob[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("detect_strategies")
+}
+
+/// 组合检测任务（2.4.9）：一次执行，含多个可跨类别的子任务，按并发上限同时执行。
+model DetectJob {
+  id            String          @id @default(uuid())
+  tenantId      String?
+  name          String
+  /// DetectTaskStatus：PENDING 未启动 | RUNNING | PAUSED | COMPLETED | FAILED | CANCELED
+  status        String          @default("PENDING")
+  maxParallel   Int             @default(4)
+  strategyId    String?
+  strategy      DetectStrategy? @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  /// 检测方案 detect_schemes.id（C 线）；外键由 C 线迁移 20261122120200 补
+  schemeId      String?
+  scheme        DetectScheme?   @relation(fields: [schemeId], references: [id], onDelete: SetNull)
+  /// manual | schedule | scheme | quick
+  triggeredBy   String          @default("manual")
+  stopRequested Boolean         @default(false)
+  /// 编排租约：同一时刻只有一个进程推进这个组合任务
+  leaseUntil    DateTime?
+  /// 租约持有者（每次推进随机生成），续租和释放只动自己持有的
+  leaseOwner    String?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdById   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  items         DetectJobItem[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([strategyId, createdAt])
+  @@index([schemeId])
+  @@map("detect_jobs")
+}
+
+model DetectJobItem {
+  id            String       @id @default(uuid())
+  tenantId      String?
+  jobId         String
+  job           DetectJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  position      Int
+  /// DETECT_JOB_ITEM_KINDS
+  kind          String
+  title         String
+  params        Json
+  /// 选工具时记下的工具中心工具 id（展示用，不建外键）
+  toolId        String?
+  /// 台账资产 ledger_assets.id（C 线）；外键由 C 线迁移 20261122120200 补
+  ledgerAssetId String?
+  ledgerAsset   LedgerAsset? @relation(fields: [ledgerAssetId], references: [id], onDelete: SetNull)
+  /// DetectTaskStatus；PENDING 且 recordId 为空表示还没启动
+  status        String       @default("PENDING")
+  recordKind    String?
+  recordId      String?
+  error         String?
+  launchedAt    DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([jobId, position])
+  @@index([recordKind, recordId])
+  @@index([ledgerAssetId])
+  @@index([tenantId])
+  @@map("detect_job_items")
+}
+
+/// 应用台账（2.8.1）：应用平台、服务器、终端、通用软件、AI 模型及组件。终端关联 fleet_endpoints，模型关联 model_targets。
+model LedgerAsset {
+  id              String             @id @default(uuid())
+  tenantId        String?
+  /// LEDGER_ASSET_TYPES
+  type            String
+  name            String
+  /// 客户自己的资产编号，可空；同租户内不重复
+  code            String?
+  description     String             @default("")
+  ownerName       String?
+  ownerDepartment String?
+  organizationId  String?
+  organization    Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  tags            String[]
+  /// 各类型专有字段（ledger/attrs.ts 校验）
+  attrs           Json               @default("{}")
+  fleetEndpointId String?            @unique
+  fleetEndpoint   FleetEndpoint?     @relation(fields: [fleetEndpointId], references: [id], onDelete: SetNull)
+  modelTargetId   String?
+  modelTarget     ModelTarget?       @relation(fields: [modelTargetId], references: [id], onDelete: SetNull)
+  createdById     String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  outgoing        LedgerRelation[]   @relation("LedgerRelationFrom")
+  incoming        LedgerRelation[]   @relation("LedgerRelationTo")
+  schemeItems     DetectSchemeItem[]
+  jobItems        DetectJobItem[]
+
+  @@unique([tenantId, type, name])
+  @@unique([tenantId, code])
+  @@unique([tenantId, type, modelTargetId])
+  @@index([tenantId])
+  @@index([modelTargetId])
+  @@index([organizationId])
+  @@map("ledger_assets")
+}
+
+/// 台账资产之间的关系（使用、部署于、包含），允许的组合见 @lse/shared 的 LEDGER_RELATION_RULES。
+model LedgerRelation {
+  id        String      @id @default(uuid())
+  tenantId  String?
+  fromId    String
+  from      LedgerAsset @relation("LedgerRelationFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  toId      String
+  to        LedgerAsset @relation("LedgerRelationTo", fields: [toId], references: [id], onDelete: Cascade)
+  /// LEDGER_RELATION_KINDS
+  kind      String
+  createdAt DateTime    @default(now())
+
+  @@unique([fromId, toId, kind])
+  @@index([toId])
+  @@index([tenantId])
+  @@map("ledger_relations")
+}
+
+/// 检测方案（2.8.2）：需求配置 + 方案清单。状态按清单和关联的组合任务推算，不存。
+model DetectScheme {
+  id          String             @id @default(uuid())
+  tenantId    String?
+  name        String
+  /// 需求配置 { objective, categories: DetectCategory[], assetIds: string[], plannedStart?, plannedEnd?, contactName?, contactPhone?, notes? }
+  requirement Json
+  generatedAt DateTime?
+  archivedAt  DateTime?
+  createdById String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  items       DetectSchemeItem[]
+  jobs        DetectJob[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("detect_schemes")
+}
+
+/// 方案清单项：一个资产 × 一个工具中心入口。auto 项建组合任务时成为子任务，manual 项按作业指导书人工执行。
+model DetectSchemeItem {
+  id        String       @id @default(uuid())
+  tenantId  String?
+  schemeId  String
+  scheme    DetectScheme @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  position  Int
+  assetId   String?
+  asset     LedgerAsset? @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  /// DetectCategory
+  category  String
+  /// TOOL_TASK_ENTRIES 的 key
+  entryKey  String
+  /// auto 平台自动执行（建组合任务时成为子任务）| manual 按作业指导书人工执行
+  mode      String
+  /// mode = auto 时的子任务类型（DETECT_JOB_ITEM_KINDS）
+  jobKind   String?
+  params    Json         @default("{}")
+  title     String
+  note      String       @default("")
+  enabled   Boolean      @default(true)
+  /// generated 规则生成 | manual 手工添加
+  origin    String       @default("generated")
+  /// 生成后被手工改过：重新生成时保留
+  edited    Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([schemeId, position])
+  @@index([assetId])
+  @@index([tenantId])
+  @@map("detect_scheme_items")
+}
+
+/// 报告模板（2.4.7）：章节取舍、封面、页眉页脚、密级、证据详略。租户内。
+model ReportTemplate {
+  id             String   @id @default(uuid())
+  tenantId       String?
+  name           String
+  /// REPORT_OPTIONAL_SECTIONS 的子集；空数组表示全部章节
+  sections       String[]
+  /// none | summary | full
+  evidenceDetail String   @default("full")
+  /// 封面标题；空用报告标题
+  coverTitle     String   @default("")
+  /// 封面抬头；空用平台名
+  coverKicker    String   @default("")
+  /// 检测单位
+  organization   String   @default("")
+  /// 委托单位
+  client         String   @default("")
+  classification String   @default("内部使用")
+  /// 页眉；空用默认（HTML「大模型安全评估报告」，Word「平台名 + 报告标题」）
+  headerText     String   @default("")
+  /// 页脚；空用默认（平台名 / 报告编号）
+  footerText     String   @default("")
+  isDefault      Boolean  @default(false)
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("report_templates")
+}
+
+/// 远程部署（2.4.8）：凭据只在部署进程内存里用，不落库。
+model FleetRemoteDeploy {
+  id                 String    @id @default(uuid())
+  tenantId           String?
+  /// ssh 平台经 SSH 推送 | manual 一次性部署命令
+  mode               String
+  host               String
+  port               Int       @default(22)
+  username           String    @default("")
+  /// password | key | none（manual）
+  authType           String    @default("none")
+  /// 用户确认的主机公钥指纹（SHA256:…）和类型
+  hostKeyFingerprint String    @default("")
+  hostKeyType        String    @default("")
+  /// PENDING | CONNECTING | INSTALLING | SUCCEEDED | FAILED
+  status             String    @default("PENDING")
+  enrollmentCodeId   String?
+  endpointId         String?
+  postureTaskId      String?
+  enableEval         Boolean   @default(false)
+  runPosture         Boolean   @default(true)
+  startedAt          DateTime?
+  connectedAt        DateTime?
+  uploadedAt         DateTime?
+  scriptFetchedAt    DateTime?
+  installedAt        DateTime?
+  registeredAt       DateTime?
+  firstReportAt      DateTime?
+  durationMs         Int?
+  errorCode          String?
+  errorMessage       String?
+  /// 脚本输出（不超过 64 KiB，接入码已打码）
+  log                String    @default("")
+  createdById        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([enrollmentCodeId])
+  @@index([endpointId])
+  @@index([status, updatedAt])
+  @@map("fleet_remote_deploys")
+}

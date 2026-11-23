@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "license.v2",
+  "payload": {
+    "schemaVersion": "license.v2",
+    "licenseId": "lic_e2e_lse",
+    "customer": {
+      "id": "cust_e2e",
+      "displayName": "E2E验签夹具"
+    },
+    "subject": {
+      "displayName": "大模型安全测评平台授权",
+      "products": ["llm-safety-eval-platform"]
+    },
+    "edition": "enterprise",
+    "issuedAt": "2026-06-25T02:25:36Z",
+    "notBefore": "2026-06-25T02:25:36Z",
+    "expiresAt": "2036-06-23T02:25:36Z",
+    "maxUsers": 100000,
+    "features": ["agent_audit", "content_retention", "ide_proxy", "sensitive_data_guard", "web_ai"],
+    "deploymentBinding": {
+      "mode": "required",
+      "bindingId": "dep_e2e_lse",
+      "fingerprints": [
+        {
+          "scope": "deployment",
+          "algorithm": "sha256",
+          "value": "19546be6e4e16b8d5fc2f630eac5efbd1517fc35a1bb84e7869c654eafc44595"
+        }
+      ]
+    },
+    "gracePolicy": {
+      "expiryGraceDays": 30,
+      "clockRollbackGraceHours": 24,
+      "offlineRevocationStaleDays": 30
+    },
+    "revocationInfo": {
+      "mode": "none"
+    },
+    "issuer": "huoxianbao-license-authority-prod"
+  },
+  "signatureAlgorithm": "Ed25519-JCS-B64URL",
+  "keyId": "lse-lic-2026",
+  "signature": "rmd17ylAmjcTcWwkTYpNJO1SK1kjmB2ZjPLOL3DtWXhXHCry9Zp9hF0w2-uzvmyrIFaga-tnDPsqY91lZiI1DQ"
+}

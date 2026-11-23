@@ -1,0 +1,11 @@
+server:
+  host: 127.0.0.1
+  port: 8080
+permissions:
+  - read:notes
+  - write:notes
+roots:
+  - ./notes
+logging:
+  level: info
+  password_field: "***"

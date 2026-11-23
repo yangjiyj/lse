@@ -1,0 +1,28 @@
+id: lse-unauthenticated-admin-status
+
+info:
+  name: LSE Controlled Unauthenticated Admin Status
+  author: lse
+  severity: high
+  description: Uses a read-only request to verify whether an administrative status endpoint is exposed without authentication.
+  remediation: Require authentication and object-level authorization before returning administrative status information.
+  metadata:
+    customer-title: '未授权管理状态接口'
+    customer-summary: '经授权的只读核验发现，目标在未提供身份凭据时返回了管理状态信息。'
+    lse-evidence: active
+  tags: lse,deep,authz
+
+http:
+  - method: GET
+    path:
+      - '{{RootURL}}/admin/status'
+    redirects: false
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: regex
+        part: body
+        regex:
+          - '"admin"\s*:\s*true'

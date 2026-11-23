@@ -1,0 +1,8 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    command: ["/bin/bash", "-c", "python3 -m vllm.entrypoints.openai.api_server --model /models/qwen --port 8000"]
+    environment:
+      - OPENAI_BASE=http://10.0.0.12:8000/v1
+    volumes:
+      - ./model:/models/qwen

@@ -1,0 +1,24 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:10000000-0000-4000-8000-000000000002",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "NVIDIA Triton 推理服务",
+      "version": "2.40.0",
+      "purl": "pkg:generic/nvidia/tritonserver@2.40.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "group": "org.apache.logging.log4j",
+      "name": "log4j-core",
+      "version": "2.25.4",
+      "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.4",
+      "cpe": "cpe:2.3:a:apache:log4j:2.25.4:*:*:*:*:*:*:*"
+    }
+  ]
+}

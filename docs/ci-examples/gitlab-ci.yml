@@ -1,0 +1,29 @@
+# GitLab CI 示例：LSE 评估作为合并门禁。
+# 前置：把 scripts/lse-ci.mjs 与 scripts/lib/lse-ci-core.mjs 放进仓库 ci/ 目录；
+# 在 Settings -> CI/CD -> Variables 配置 LSE_TOKEN（Masked + Protected）、LSE_URL、LSE_PLAN_ID。
+lse-gate:
+  stage: test
+  image: node:20-alpine
+  timeout: 90m
+  variables:
+    # 私有化自签证书：把 CA 放进仓库后启用（不要关闭证书校验）
+    # NODE_EXTRA_CA_CERTS: "$CI_PROJECT_DIR/ci/lse-ca.pem"
+    GIT_STRATEGY: fetch
+  script:
+    # 退出码 1 = 门禁未通过，作业失败；2 = 评估失败/超时；3 = 用法或认证错误
+    - node ci/lse-ci.mjs run --plan "$LSE_PLAN_ID" --wait --timeout 4800 --task-file lse-task.txt
+  after_script:
+    - |
+      if [ -s lse-task.txt ]; then
+        node ci/lse-ci.mjs export --task-file lse-task.txt --format junit --out lse-junit.xml
+        node ci/lse-ci.mjs export --task-file lse-task.txt --format json --out lse-result.json
+      fi
+  artifacts:
+    when: always
+    paths:
+      - lse-junit.xml
+      - lse-result.json
+    reports:
+      junit: lse-junit.xml   # 在合并请求的「测试」页签展示失败用例
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"

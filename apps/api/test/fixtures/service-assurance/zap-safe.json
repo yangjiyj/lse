@@ -1,0 +1,41 @@
+{
+  "@programName": "ZAP",
+  "@version": "2.16.1",
+  "@generated": "Sun, 30 Aug 2026 08:30:00",
+  "site": [
+    {
+      "@name": "http://gateway-negative:8080",
+      "@host": "gateway-negative",
+      "@port": "8080",
+      "@ssl": "false",
+      "alerts": [
+        {
+          "pluginid": "10021",
+          "alertRef": "10021",
+          "alert": "X-Content-Type-Options Header Missing",
+          "name": "X-Content-Type-Options Header Missing",
+          "riskcode": "1",
+          "confidence": "2",
+          "riskdesc": "Low (Medium)",
+          "desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to nosniff.</p>",
+          "instances": [
+            {
+              "uri": "http://gateway-negative:8080/openapi.json",
+              "method": "GET",
+              "param": "X-Content-Type-Options",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            }
+          ],
+          "count": "1",
+          "solution": "<p>Set the X-Content-Type-Options response header to nosniff.</p>",
+          "reference": "https://owasp.org/www-project-secure-headers/",
+          "cweid": "693",
+          "wascid": "15",
+          "sourceid": "3"
+        }
+      ]
+    }
+  ]
+}

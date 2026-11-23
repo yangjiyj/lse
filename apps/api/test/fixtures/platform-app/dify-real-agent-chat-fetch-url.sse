@@ -1,0 +1,20 @@
+data: {"event":"agent_thought","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"287959bc-0fed-42d7-93d2-54dfc24e4ac1","position":1,"thought":"","observation":"","tool":"","tool_labels":{},"tool_input":"","message_files":[]}
+
+data: {"event":"agent_message","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","answer":""}
+
+data: {"event":"agent_message","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","answer":""}
+
+data: {"event":"agent_thought","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"287959bc-0fed-42d7-93d2-54dfc24e4ac1","position":1,"thought":"","observation":"","tool":"fetch_url","tool_labels":{"fetch_url":{"en_US":"fetch_url","zh_Hans":"fetch_url"}},"tool_input":"{\"fetch_url\": {\"url\": \"http://example.com/lse-probe\"}}","message_files":[]}
+
+data: {"event":"agent_thought","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"287959bc-0fed-42d7-93d2-54dfc24e4ac1","position":1,"thought":"","observation":"{\"fetch_url\": \"tool invoke error: Access to 'http://127.0.0.1:9/fetch' was blocked by SSRF protection (e.g. SSRF_PROXY_ALLOW_PRIVATE_IPS=172.21.0.0/16 to allow 172.21.0.0/16). The URL resolves to a private, loopback, link-local, or otherwise non-public network address. See https://github.com/langgenius/dify/issues/38443.\"}","tool":"fetch_url","tool_labels":{"fetch_url":{"en_US":"fetch_url","zh_Hans":"fetch_url"}},"tool_input":"{\"fetch_url\": {\"url\": \"http://example.com/lse-probe\"}}","message_files":[]}
+
+data: {"event":"agent_thought","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"1eeb9888-d240-4f32-a498-3ce0ba58bd5d","position":2,"thought":"","observation":"","tool":"","tool_labels":{},"tool_input":"","message_files":[]}
+
+data: {"event":"agent_message","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","answer":"无法抓取该地址：请求被安全保护拦截，因为它解析到非公网网络地址。"}
+
+data: {"event":"agent_message","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","answer":""}
+
+data: {"event":"agent_thought","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"1eeb9888-d240-4f32-a498-3ce0ba58bd5d","position":2,"thought":"无法抓取该地址：请求被安全保护拦截，因为它解析到非公网网络地址。","observation":"","tool":"","tool_labels":{},"tool_input":"","message_files":[]}
+
+data: {"event":"message_end","conversation_id":"145b9a86-5482-4969-a985-fb6c592c3ce8","message_id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","created_at":1792486519,"task_id":"7f06a25c-e4d9-4693-8334-444381c4ae3b","id":"e4ad1615-c11f-4e06-bbe4-33667e36789f","metadata":{"retriever_resources":[],"usage":{"prompt_tokens":673,"prompt_unit_price":"0","prompt_price_unit":"0","prompt_price":"0","completion_tokens":51,"completion_unit_price":"0","completion_price_unit":"0","completion_price":"0","total_tokens":724,"total_price":"0","currency":"USD","latency":9.403213958983542},"reasoning":{}},"files":[]}
+

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+*.db
+*.db.wal
+dbdata/
+.pyrit/
+pyrit_runs/

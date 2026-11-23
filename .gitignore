@@ -1,0 +1,47 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+.vite/
+.turbo/
+
+# prisma generated client lives under node_modules; ignore stray sqlite
+*.db
+*.sqlite
+
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+license.json
+
+# logs / coverage
+*.log
+logs/
+coverage/
+
+# runtime data volumes
+/data/
+/.docker-data/
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# prisma generated client
+**/src/generated/
+
+.worktrees/
+
+# 运行环境信任的网关自签 CA（不入库，由部署侧放置）
+certs/*.crt
+certs/*.key
+!certs/.gitkeep

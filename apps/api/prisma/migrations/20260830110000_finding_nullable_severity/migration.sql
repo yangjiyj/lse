@@ -1,0 +1,2 @@
+ALTER TABLE "findings" ALTER COLUMN "severity" DROP DEFAULT;
+ALTER TABLE "findings" ALTER COLUMN "severity" DROP NOT NULL;
