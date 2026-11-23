@@ -8,6 +8,27 @@
 
 本项目以[木兰宽松许可证第 2 版（Mulan PSL v2）](./LICENSE)开源。 第三方开源组件声明见 [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md)。
 
+## 界面截图 / Screenshots
+
+> 截图使用虚构的演示数据。Screenshots use fictional demo data.
+
+![态势概览 / Dashboard](docs/screenshots/01-home.png)
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/02-new-eval.png" alt="新建评估"><br>新建评估 · New evaluation</td>
+<td width="50%"><img src="docs/screenshots/03-task-detail.png" alt="评估任务详情"><br>评估任务详情 · Task result</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/04-task-results.png" alt="逐题判定"><br>逐题判定 · Per-sample verdicts</td>
+<td><img src="docs/screenshots/05-report.png" alt="评估报告"><br>评估报告 · Report</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/06-question-bank.png" alt="模型题库"><br>模型题库 · Question banks</td>
+<td><img src="docs/screenshots/07-standard-clauses.png" alt="国内标准条款"><br>国内标准条款 · GB/T 45654 clauses</td>
+</tr>
+</table>
+
 ## English
 
 **JianDun (鉴盾)** is a self-hosted platform for evaluating the safety of large language models and AI applications before they go live. Connect a model, pick or import a question bank, run an evaluation task, and get a verdict per sample plus a report in Chinese.
